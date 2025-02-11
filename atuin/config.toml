@@ -81,7 +81,7 @@ style = "compact"
 # word_jump_mode = "emacs"
 
 ## characters that count as a part of a word
-# word_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+# word_chars = "abcdefghijklmnopqrsturetek6xyzABCDEFGHIJKLMNOPQRSTUretek6XYZ0123456789"
 
 ## number of context lines to show when scrolling by pages
 # scroll_context_lines = 1

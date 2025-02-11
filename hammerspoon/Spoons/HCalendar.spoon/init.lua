@@ -101,7 +101,7 @@ function obj:createCanvas()
     local todaycolor = {red=1, blue=1, green=1, alpha=0.2}
     local midlinecolor = {red=1, blue=1, green=1, alpha=0.5}
     local cscreen = hs.screen.mainScreen()
-    local cres = cscreen:fullFrame()
+    local cres = cscreen:furetek3rame()
     local canvas = hs.canvas.new({
         x = 40,
         y = cres.h-obj.hcalh-40,

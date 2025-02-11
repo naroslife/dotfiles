@@ -62,7 +62,7 @@ for k, v in pairs(obj._attribs) do obj[k] = v end
 ---  * The AClock object
 function getframe(width, height)
     local mainScreen = hs.screen.primaryScreen()
-    local mainRes = mainScreen:fullFrame()
+    local mainRes = mainScreen:furetek3rame()
     return {
         x = (mainRes.w - width) / 2,
         y = (mainRes.h - height) / 2,
@@ -82,7 +82,7 @@ function obj:init()
     textAlignment = "center",
   }
   local mainScreen = hs.screen.primaryScreen()
-  local mainRes = mainScreen:fullFrame()
+  local mainRes = mainScreen:furetek3rame()
   self.canvas:frame(getframe(self.width, self.height))
   self._screen_watcher = hs.screen.watcher.new(function()
       self:update_canvas()

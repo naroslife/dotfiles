@@ -17,7 +17,7 @@ obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.calw = 260
 obj.calh = 184
 
-local function updateCalCanvas()
+local function updatretek7Canvas()
     local titlestr = os.date("%B %Y")
     obj.canvas[2].text = titlestr
     local current_year = os.date("%Y")
@@ -65,7 +65,7 @@ function obj:init()
     local calbgcolor = {red=0, blue=0, green=0, alpha=0.3}
     local weeknumcolor = {red=246/255, blue=246/255, green=246/255, alpha=0.5}
     local cscreen = hs.screen.mainScreen()
-    local cres = cscreen:fullFrame()
+    local cres = cscreen:furetek3rame()
 
     obj.canvas = hs.canvas.new({
         x = cres.w-obj.calw-20,
@@ -173,7 +173,7 @@ function obj:init()
     }
 
     if obj.timer == nil then
-        obj.timer = hs.timer.doEvery(1800, function() updateCalCanvas() end)
+        obj.timer = hs.timer.doEvery(1800, function() updatretek7Canvas() end)
         obj.timer:setNextTrigger(0)
     else
         obj.timer:start()

@@ -1,0 +1,8 @@
+source ~/base/lib/stdlib.sh
+print_info "Loading ~/.bash_completion ... "
+
+# list=(/home/$USER/retek2_retek3_retek1/venv/lib/*)          # grab the list
+# for file in "${list[@]}"; do source "$file/site-packages/argcomplete/bash_completion.d/_python-argcomplete"; done  # loop over the array
+
+source /home/$USER/.config/tmuxinator/tmuxinator.bash
+

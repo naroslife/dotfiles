@@ -18,7 +18,7 @@ get_attendees() {
 		--separateByDate \
 		--excludeEndDates \
 		--bullet "" \
-		--excludeCals "training,omerxx@gmail.com" \
+		--excludretek7s "training,omerxx@gmail.com" \
 		eventsToday)
 }
 
@@ -41,7 +41,7 @@ get_next_meeting() {
 		--excludeAllDayEvents \
 		--separateByDate \
 		--bullet "" \
-		--excludeCals "training,omerxx@gmail.com" \
+		--excludretek7s "training,omerxx@gmail.com" \
 		eventsToday)
 }
 
@@ -58,7 +58,7 @@ get_next_next_meeting() {
 		--excludeAllDayEvents \
 		--separateByDate \
 		--bullet "" \
-		--excludeCals "training,omerxx@gmail.com" \
+		--excludretek7s "training,omerxx@gmail.com" \
 		eventsFrom:"${end_timestamp}" to:"${tonight}")
 }
 
@@ -73,10 +73,10 @@ parse_result() {
 }
 
 calculate_times(){
-	epoc_meeting=$(date -j -f "%T" "$time:00" +%s)
-	epoc_now=$(date +%s)
-	epoc_diff=$((epoc_meeting - epoc_now))
-	minutes_till_meeting=$((epoc_diff/60))
+	eretek5_meeting=$(date -j -f "%T" "$time:00" +%s)
+	eretek5_now=$(date +%s)
+	eretek5_diff=$((eretek5_meeting - eretek5_now))
+	minutes_till_meeting=$((eretek5_diff/60))
 }
 
 display_popup() {
@@ -94,7 +94,7 @@ display_popup() {
 			--includeOnlyEventsFromNowOn \
 			--limitItems 1 \
 			--excludeAllDayEvents \
-			--excludeCals "training" \
+			--excludretek7s "training" \
 			eventsToday
 }
 
@@ -107,7 +107,7 @@ print_tmux_status() {
 		echo "$NERD_FONT_FREE"
 	fi
 
-	if [[ $epoc_diff -gt $ALERT_POPUP_BEFORE_SECONDS && epoc_diff -lt $ALERT_POPUP_BEFORE_SECONDS+10 ]]; then
+	if [[ $eretek5_diff -gt $ALERT_POPUP_BEFORE_SECONDS && eretek5_diff -lt $ALERT_POPUP_BEFORE_SECONDS+10 ]]; then
 		display_popup
 	fi
 }

@@ -10,8 +10,8 @@ if [ -z "$ISDOCKER" ]; then
     esac
 fi
 
-source ~/base/lib/stdlib.sh
-print_info "Loading ~/.bashrc ... "
+# source ~/base/lib/stdlib.sh
+# print_info "Loading ~/.bashrc ... "
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -152,7 +152,7 @@ fi
 if [ -d "/home/naroslife/nvim-linux64/bin" ] ; then
     export PATH="/home/naroslife/nvim-linux64/bin:$PATH"
 fi
-dedupe_path
+# dedupe_path
 
 
 . "$HOME/.cargo/env"
@@ -172,24 +172,34 @@ fi
 
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-source ~/base/lib/stdlib.sh
-source ~/column_ansi/src/column_ansi.sh
+# source ~/base/lib/stdlib.sh
+# source ~/column_ansi/src/column_ansi.sh
 eval "$(zoxide init bash)"
 eval "$(starship init bash)"
 
-if [ "$LC_SWITCHTO" = "elvish" ]; then
-    print_info "Switching to elvish..." && exec elvish
-elif [ "$LC_SWITCHTO" = "inshellisense" ]; then
-    print_info "Loading inshellisense..."
-    if [[ -z "${ISTERM}" && $- = *i* && $- != *c* ]]; then
-        shopt -q login_shell
-        login_shell=$?
-        if [ $login_shell -eq 0 ]; then
-            is -s bash --login ; exit
-        else
-            is -s bash ; exit
-        fi 
-    fi
-fi  
+# if [ "$LC_SWITCHTO" = "elvish" ]; then
+#     print_info "Switching to elvish..." && exec elvish
+# elif [ "$LC_SWITCHTO" = "inshellisense" ]; then
+#     print_info "Loading inshellisense..."
+#     if [[ -z "${ISTERM}" && $- = *i* && $- != *c* ]]; then
+#         shopt -q login_shell
+#         login_shell=$?
+#         if [ $login_shell -eq 0 ]; then
+#             is -s bash --login ; exit
+#         else
+#             is -s bash ; exit
+#         fi 
+#     fi
+# fi  
 
 . "$HOME/.atuin/bin/env"
+. $HOME/.asdf/asdf.sh
+eval $(thefuck --alias)
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+. $HOME/.asdf/asdf.sh
+eval $(thefuck --alias)
+. $HOME/.asdf/asdf.sh
+eval $(thefuck --alias)

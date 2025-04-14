@@ -15,7 +15,7 @@ use github.com/muesli/elvish-libs/git
 use naroslife/utilities/log
 use naroslife/utilities/you-should-use
 
-set paths = [~/.local/usr/bin ~/.local/bin ~/.cargo/bin ~/.atuin/bin ~/.cargo/env ~/go/bin ~/.gem/ruby/(ruby -e 'print RUBY_VERSION')/bin $@paths]
+set paths = [~/.nvm/versions/node/v22.14.0/bin ~/.sdkman/candidates/gradle/current/bin ~/.local/usr/bin ~/.local/bin ~/.cargo/bin ~/.atuin/bin ~/.cargo/env ~/go/bin ~/.gem/ruby/(ruby -e 'print RUBY_VERSION')/bin $@paths]
 set-env XDG_CONFIG_HOME ~/.config
 set-env FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow'
 

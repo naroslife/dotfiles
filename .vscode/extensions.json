@@ -1,0 +1,70 @@
+{
+    "recommendations": [
+        "ms-vscode.cpptools-extension-pack", // C++ development
+        "ms-vscode-remote.remote-ssh", // Remote development via SSH
+        "ms-vscode-remote.remote-containers", // Development in containers
+        "esbenp.prettier-vscode", // Prettier formatting
+        "mads-hartmann.bash-ide-vscode", // Bash extensions
+        "ms-python.python", // Python extensions
+        "ms-python.vscode-pylance", // Python language server
+        "redhat.java", // Java extensions
+        "vscjava.vscode-java-pack", // Java development pack
+        "mattn.vscode-elvish", // Elvish extension
+        "github.vscode-pull-request-github", // GitHub extensions
+        "eamodio.gitlens", // GitLens for Git integration
+        "gitkraken.gitkraken-authentication", // GitKraken extension
+        "ms-azuretools.vscode-docker", // Docker support
+        "ms-vscode.vscode-typescript-next", // TypeScript support
+        "ms-vsliveshare.vsliveshare", // Live Share for collaboration
+        "ms-vscode-remote.remote-ssh-edit", // Remote SSH editing
+        "ms-vscode-remote.remote-ssh-explorer", // Remote SSH explorer
+        "ms-vscode-remote.remote-wsl", // WSL support
+        "johnpapa.vscode-peacock", // Peacock for color customization
+        "afractal.node-essentials",
+        "be5invis.vscode-icontheme-nomo-dark",
+        "christian-kohler.path-intellisense",
+        "dbaeumer.vscode-eslint",
+        "editorconfig.editorconfig",
+        "github.codespaces",
+        "github.copilot",
+        "github.copilot-chat",
+        "k--kato.intellij-idea-keybindings",
+        "mikestead.dotenv",
+        "redhat.vscode-yaml",
+        "wallabyjs.quokka-vscode",
+        "jeff-hykin.better-cpp-syntax",
+        "ms-vscode.cpptools-themes",
+        "wholroyd.jinja",
+        "kevinrose.vsc-python-indent",
+        "njpwerner.autodocstring",
+        "ms-python.debugpy",
+        "golang.go",
+        "1yib.rust-bundle",
+        "atlassian.atlascode",
+        "gitlab.gitlab-workflow",
+        "christian-kohler.npm-intellisense",
+        "ms-vscode.powershell",
+        "actboy168.tasks",
+        "augustocdias.tasks-shell-input",
+        "rioj7.command-variable",
+        "xaver.clang-format",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-vscode.makefile-tools",
+        "cschlosser.doxdocgen",
+        "redhat.ansible",
+        "tabeyti.jenkins-jack",
+        "streetsidesoftware.code-spell-checker",
+        "wayou.vscode-todo-highlight",
+        "usernamehw.errorlens",
+        "mhutchie.git-graph",
+        "codezombiech.gitignore",
+        "xyz.local-history",
+        "matepek.vscode-catch2-test-adapter",
+        "jebbs.plantuml",
+        "humao.rest-client",
+        "spencerwmiles.vscode-task-buttons",
+        "sonarsource.sonarlint-vscode",
+        "pkief.material-icon-theme",
+        "dracula-theme.theme-dracula"
+    ]
+}

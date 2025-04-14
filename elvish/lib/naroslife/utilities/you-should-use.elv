@@ -223,10 +223,9 @@ fn disable-you-should-use {
 
 # Function to enable the plugin
 fn enable-you-should-use {
-  disable-you-should-use
   set edit:after-command = [ {|m| ysu-after-command $m} ]
-  echo (styled "You-Should-Use enabled" green)
+  # echo (styled "You-Should-Use enabled" green)
 }
 
 # Initialize
-echo (styled "Elvish You-Should-Use v"$YSU_VERSION" loaded" blue bold)
+enable-you-should-use

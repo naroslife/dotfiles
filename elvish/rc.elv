@@ -103,11 +103,6 @@ if (has-external sdk) {
     eval (sdk env | slurp)
 }
 
-set edit:prompt = {
-     tilde-abbr $pwd
-     styled '❱ ' bright-red
-   }
-
 set edit:insert:binding[C-a] = $edit:move-dot-sol~
 set edit:insert:binding[C-e] = $edit:move-dot-eol~
 set edit:insert:binding[Alt-b] = $dir:left-word-or-prev-dir~

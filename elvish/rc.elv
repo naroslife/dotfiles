@@ -1,88 +1,112 @@
-# set E:PATH = ~/bin:$E:PATH
-# set paths = (conj $paths ~/bin)
-# set E:PATH = /home/commondev/.local/bin:$E:PATH
-# set paths = (conj $paths /home/commondev/.local/bin)
-# set E:PATH = /home/commondev/.local/usr/bin:$E:PATH
-# set paths = (conj $paths /home/commondev/.local/usr/bin)
+use epm
+epm:install &silent-if-installed github.com/zzamboni/elvish-modules
+epm:install &silent-if-installed github.com/iwoloschin/elvish-packages
+epm:install &silent-if-installed github.com/muesli/elvish-libs
+epm:install &silent-if-installed github.com/iandol/elvish-modules
+epm:install &silent-if-installed github.com/kolbycrouch/elvish-libs
 
+use github.com/iwoloschin/elvish-packages/python
+use github.com/zzamboni/elvish-modules/alias
+use github.com/zzamboni/elvish-modules/util
+use github.com/zzamboni/elvish-modules/dir
+use github.com/zzamboni/elvish-modules/terminal-title
+use github.com/muesli/elvish-libs/git
+# use github.com/iandol/elvish-modules/cmds
 use naroslife/utilities/log
+use naroslife/utilities/you-should-use
 
-fn ls {|@a| e:ls -h --color $@a }
-fn ll {|@a| ls -alhF $@a }
-fn la {|@a| ls -hA $@a }
-fn l {|@a| ls -hCF $@a }
-# fn gcc {|@a| e:gcc -fdiagnostics-color $@a }
+set paths = [~/.local/usr/bin ~/.local/bin ~/.cargo/bin ~/.atuin/bin ~/.cargo/env ~/go/bin ~/.gem/ruby/(ruby -e 'print RUBY_VERSION')/bin $@paths]
+set-env XDG_CONFIG_HOME ~/.config
+set-env FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow'
 
-fn grep {|@a| e:grep --color $@a}
-fn egrep {|@a| e:egrep --color $@a}
-fn fgrep {|@a| e:fgrep --color $@a}
-set E:GCC_COLORS = "error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01"
+
+var asdf_data_dir = ~'/.asdf'
+var asdf_dir = ~/.asdf
+if (and (has-env ASDF_DATA_DIR) (!=s $E:ASDF_DATA_DIR '')) {
+  set asdf_data_dir = $E:ASDF_DATA_DIR
+}
+
+if (not (has-value $paths $asdf_data_dir'/shims')) {
+  set paths = [$asdf_data_dir'/shims' ~/.asdf/bin $@paths]
+}
+
+# use asdf _asdf
+
+# set edit:completion:arg-completer[asdf] = $_asdf:arg-completer~
+
+eval (starship init elvish | slurp)
+eval (zoxide init --cmd cd elvish | slurp)
+# eval (carapace _carapace|slurp)
+
+# Set aliases for common tools
+alias:new &save ll eza -l
+alias:new &save la tree
+alias:new &save l eza -l --icons --git -a
+alias:new &save lt eza --tree --level=2 --long --icons --git
+alias:new &save ltree eza --tree --level=2 --icons --git
+
+alias:new &save cat bat
+alias:new &save gcc e:gcc -fdiagnostics-color
+set-env GCC_COLORS "error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01"
+alias:new &save grep e:grep --color
+alias:new &save egrep e:egrep --color
+alias:new &save fgrep e:fgrep --color
+
+alias:new &save fuck thefuck --alias
+alias:new &save gcm git commit -m
+alias:new &save tldr tldr --color=always
+
+alias:new &save gc git commit -m
+alias:new &save gca git commit -a -m
+alias:new &save gp git push origin HEAD
+alias:new &save gpu git pull origin
+alias:new &save gst git status
+alias:new &save glog git log --graph --topo-order --pretty='%w(100,0,6)%C(yellow)%h%C(bold)%C(black)%d %C(cyan)%ar %C(green)%an%n%C(bold)%C(white)%s %N' --abbrev-commit
+alias:new &save gdiff git diff
+alias:new &save gco git checkout
+alias:new &save gb git branch
+alias:new &save gba git branch -a
+alias:new &save gadd git add
+alias:new &save ga git add -p
+alias:new &save gcoall git checkout -- .
+alias:new &save gr git remote
+alias:new &save gre git reset
+
+alias:new &save dco docker compose
+alias:new &save dps docker ps
+alias:new &save dpa docker ps -a
+alias:new &save dl docker ps -l -q
+alias:new &save dx docker exec -it
+
+alias:new &save .. cd ..
+alias:new &save ... cd ../..
+alias:new &save .... cd ../../..
+alias:new &save ..... cd ../../../..
+alias:new &save ...... cd ../../../../..
+
+
+# Enable colored man pages
+set-env MANPAGER "most"
+
+# Add Docker group permissions (if needed)
+use unix
+fn docker-perms {
+    sudo usermod -aG docker $E:USER
+}
+
+# Add Java environment variables (if needed)
+set-env JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+set paths = [ $E:JAVA_HOME/bin $@paths]
+
+# Add Gradle and Maven to PATH (if installed via SDKMAN)
+if (has-external sdk) {
+    eval (sdk env | slurp)
+}
 
 set edit:prompt = {
      tilde-abbr $pwd
      styled '❱ ' bright-red
    }
-
-# var asdf_data_dir = ~'/.asdf'
-# var asdf_dir = ~'/.asdf'
-# if (and (has-env ASDF_DATA_DIR) (!=s $E:ASDF_DATA_DIR '')) {
-#   set asdf_data_dir = $E:ASDF_DATA_DIR
-# }
-# 
-# if (not (has-value $paths $asdf_data_dir'/shims')) {
-#   set paths = (conj $paths $asdf_data_dir/shims)
-# }
-# use naroslife/utilities/asdf _asdf
-# var asdf~ = $_asdf:asdf~
-# set edit:completion:arg-completer[asdf] = $_asdf:arg-completer~
-
-eval (zoxide init --cmd cd elvish | slurp)
-
-use github.com/iwoloschin/elvish-packages/python
-# use github.com/zzamboni/elvish-completions/git
-# use github.com/zzamboni/elvish-completions/builtins
-# use github.com/zzamboni/elvish-completions/ssh
-use github.com/zzamboni/elvish-modules/alias
-# use github.com/zzamboni/elvish-modules/long-running-notifications
-use github.com/zzamboni/elvish-modules/util
-use github.com/zzamboni/elvish-modules/dir
-use github.com/zzamboni/elvish-modules/terminal-title
-use github.com/muesli/elvish-libs/git
-use github.com/iandol/elvish-modules/cmds
-# use github.com/zzamboni/elvish-modules/spinners
-
-
-# use github.com/aca/elvish-bash-completion/bash-completer
-# set edit:completion:arg-completer[ssh] = (bash-completer:new "ssh")
-# set edit:completion:arg-completer[scp] = (bash-completer:new "scp")
-# set edit:completion:arg-completer[curl] = (bash-completer:new "curl")
-# set edit:completion:arg-completer[man] = (bash-completer:new "man")
-# set edit:completion:arg-completer[killall] = (bash-completer:new "killall")
-# set edit:completion:arg-completer[aria2c] = (bash-completer:new "aria2c")
-# set edit:completion:arg-completer[ip] = (bash-completer:new "ip")
-# set edit:completion:arg-completer[journalctl] = (bash-completer:new "journalctl")
-# set edit:completion:arg-completer[tcpdump] = (bash-completer:new "tcpdump")
-# set edit:completion:arg-completer[iptables] = (bash-completer:new "iptables")
-# set edit:completion:arg-completer[tmux] = (bash-completer:new "tmux")
-# set edit:completion:arg-completer[fd] = (bash-completer:new "fd")
-# set edit:completion:arg-completer[rg] = (bash-completer:new "rg")
-# set edit:completion:arg-completer[pueue] = (bash-completer:new "pueue")
-# # for some commands, we need to pass bash_function
-# set edit:completion:arg-completer[gh] = (bash-completer:new "gh" &bash_function="__start_gh")
-# set edit:completion:arg-completer[pkill] = (bash-completer:new "pkill" &bash_function="pgrep")
-# set edit:completion:arg-completer[umount] = (bash-completer:new "umount" &bash_function="_umount_module")
-# set edit:completion:arg-completer[systemctl] = (bash-completer:new "systemctl" &bash_function="_systemctl systemctl")
-# set edit:completion:arg-completer[virsh] = (bash-completer:new "virsh" &bash_function="_virsh_complete virsh")
-# # builtin completions
-# set edit:completion:arg-completer[which] = (bash-completer:new "which"  &bash_function="_complete type" &completion_filename="complete")
-
-# # alias
-# set edit:completion:arg-completer[kubectl] = (bash-completer:new "kubectl" &bash_function="__start_kubectl")
-# set edit:completion:arg-completer[k] = $edit:completion:arg-completer[kubectl]
-
-set-env CARAPACE_BRIDGES 'fish' # optional
-eval (carapace _carapace|slurp)
-eval (starship init elvish)
 
 set edit:insert:binding[C-a] = $edit:move-dot-sol~
 set edit:insert:binding[C-e] = $edit:move-dot-eol~
@@ -123,15 +147,15 @@ log:print-keybind '@Ctrl+B W' '@Hierarchy. Use to kill session/windows.'
 }
 
 fn printTmux { 
-  call $detail_printTmux [] [&] | ~/column_ansi/src/column_ansi.sh -t -s "@" -R 1,2
+  call $detail_printTmux [] [&] | column -t -s "@" -R 1,2
  } 
 
 fn printKeybinds { 
-  call $detail_printKeybinds [] [&] | ~/column_ansi/src/column_ansi.sh -t -s "@" -R 1,2
+  call $detail_printKeybinds [] [&] | column -t -s "@" -R 1,2
  }
 
 fn help {
 
-  each {|f| log:print-stuff '@INFO:' '@For help in the future just type help / printKeybinds / printTmux'; call $detail_printTmux [] [&]; call $detail_printKeybinds [] [&]} [detail_printTmux] | ~/column_ansi/src/column_ansi.sh -t -s "@" -R 1,2
+  each {|f| log:print-stuff '@INFO:' '@For help in the future just type help / printKeybinds / printTmux'; call $detail_printTmux [] [&]; call $detail_printKeybinds [] [&]} [detail_printTmux] | column -t -s "@" -R 1,2
 }
 help

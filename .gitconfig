@@ -1,0 +1,54 @@
+[user]
+	email = robert.4.nagy@continental-corporation.com
+	name = Robert Nagy
+[core]
+	editor = vim
+	excludesFile = ~/.config/git/ignore
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[credential]
+	helper = "!f() { /home/uif58593/.vscode-server/bin/eaa41d57266683296de7d118f574d0c2652e1fc4/node /tmp/vscode-remote-containers-d0604ebf-bdf5-42d5-9232-8c96f39d9ff5.js git-credential-helper $*; }; f"
+[safe]
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba/external/ambasdk
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /workspaces/GRAPPA_llf_amba
+	directory = /home/uic67287/git/GRAPPA_llf_amba2

@@ -1,18 +1,20 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   # Helper to check if running on WSL
-  isWSL = pkgs.stdenv.isLinux && (pkgs.lib.strings.optionalString (pkgs.stdenv.hostPlatform.uname.kernel.release != null) pkgs.stdenv.hostPlatform.uname.kernel.release != "") =~ ".*-microsoft-.*";
+  # isWSL = pkgs.stdenv.isLinux && (pkgs.lib.strings.optionalString (pkgs.stdenv.hostPlatform.uname.kernel.release != null) pkgs.stdenv.hostPlatform.uname.kernel.release != "") =~ ".*-microsoft-.*";
 in
 {
   # Set home-manager state version
-  home.stateVersion = "23.11"; # Adjust to your home-manager version
+  home.stateVersion = "25.05"; # Adjust to your home-manager version
+  # Set the username and home directory
+  home.username = "uif58593"; # Replace with your actual username
+  home.homeDirectory = "/home/uif58593"; # Replace with your actual home directory
 
   # --- Packages to Install (Mapped from config.sh) ---
   home.packages = with pkgs; [
     # Essentials & Build Tools (from APT)
-    git git-lfs curl wget stow jq fzf most tree bat # Added bat
-    build-essential # Meta-package for gcc, make, etc.
+    git git-lfs curl wget stow jq fzf most tree bat
     gnupg # For GPG keys
     # software-properties-common, ca-certificates, apt-transport-https, lsb-release are usually handled by NixOS/Nix environment
 
@@ -36,13 +38,12 @@ in
 
     # C/C++ (from APT)
     gcc # Or clang if preferred
-    gdb cmake ninja clang-tools lldb cppcheck valgrind boost
+    gdb cmake ninja clang-tools lldb cppcheck valgrind boost glibc.dev
 
     # Documentation & Utils (from APT)
     doxygen graphviz
 
     # Python (from APT & PIP)
-    python3 # Includes pip
     (python3.withPackages (ps: with ps; [
       # Add pip packages here
       thefuck
@@ -95,12 +96,6 @@ in
     nix-direnv.enable = true; # Integrates direnv with Nix shells
   };
 
-  # --- Elvish (Primary) ---
-  programs.elvish = {
-    enable = true;
-    # Add other elvish specific settings if needed
-  };
-
   # --- Bash (Secondary) ---
   programs.bash = {
     enable = true;
@@ -131,7 +126,6 @@ in
   # Enable atuin (adjust integrations)
   programs.atuin = {
     enable = true;
-    enableBashIntegration = true;   # Secondary
     # enableZshIntegration = false; # Remove Zsh
     # Optional: Configure settings
     # settings = { ... };
@@ -140,16 +134,17 @@ in
   # Enable fzf integration (adjust integrations)
   programs.fzf = {
     enable = true;
-    enableBashIntegration = true;   # Secondary
+    # enableBashIntegration = true;   # Secondary
     # enableZshIntegration = false; # Remove Zsh
   };
 
 
   # --- Dotfile Management (Assuming Stow Layout) ---
   # Link files directly in the root of the dotfiles repo
-  home.file.".bashrc".source = ./.bashrc;
-  home.file.".profile".source = ./.profile;
-  home.file.".gitconfig".source = ./.gitconfig;
+  home.file.".bashrc" = {
+    source = lib.mkForce ./.bashrc;
+  };
+  home.file.".profile".source = lib.mkForce ./.profile;
   # home.file.".zshrc".source = ./.zshrc; # Remove Zsh config link
 
   # Link Elvish config directory/file
@@ -164,8 +159,6 @@ in
   home.file.".config/tmux" = { source = ./tmux; recursive = true; };
   home.file.".config/starship.toml" = { source = ./starship/starship.toml; recursive = true; }; # Link specific file, ensure parent dir exists
   home.file.".config/atuin" = { source = ./atuin; recursive = true; }; # If you have custom atuin config
-  home.file.".config/bat" = { source = ./bat; recursive = true; }; # If you have custom bat config
-  home.file.".local/share/navi" = { source = ./navi; recursive = true; }; # If you have custom navi cheatsheets
 
   # Add other directories/files managed by stow here...
   # Example: home.file.".config/alacritty" = { source = ./alacritty; recursive = true; };

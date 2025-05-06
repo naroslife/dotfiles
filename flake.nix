@@ -36,13 +36,13 @@
       };
 
       # Define a default package or devShell
-      packages.${system}.default = pkgs.mkShell {
-        name = "dotfiles-env";
-        buildInputs = [ pkgs.git pkgs.nix ];
-      };
+      # packages.${system}.default = pkgs.mkShell {
+      #   name = "dotfiles-env";
+      #   buildInputs = [ pkgs.git pkgs.nix ];
+      # };
 
       # Optionally, set a defaultPackage for convenience
-      defaultPackage.${system} = self.packages.${system}.default;
+      # defaultPackage.${system} = self.packages.${system}.default;
 
       # You could also define devShells, packages, etc. here if needed
       # Example devShell:

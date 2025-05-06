@@ -2,7 +2,7 @@
 
 # Step 1: Transfer Nix Store Closure (Online Machine):
 echo "Phase 2, Step 1: Transferring Nix store closure..."
-nix copy --to ssh://uif58593@10.36.67.81 "$ACTIVATION_PACKAGE_STORE_PATH"
+nix copy --to ssh://uif58593@10.36.67.81 "$ACTIVATION_PACKAGE_STORE_PATH" --all
 echo "Nix store closure transfer complete."
 echo ""
 

@@ -158,7 +158,6 @@ in
   home.file.".config/nvim" = { source = ./nvim; recursive = true; };
   home.file.".config/tmux" = { source = ./tmux; recursive = true; };
   home.file.".config/starship.toml" = { source = ./starship/starship.toml; recursive = true; }; # Link specific file, ensure parent dir exists
-  home.file.".config/atuin" = { source = ./atuin; recursive = true; }; # If you have custom atuin config
 
   # Add other directories/files managed by stow here...
   # Example: home.file.".config/alacritty" = { source = ./alacritty; recursive = true; };

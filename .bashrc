@@ -9,6 +9,7 @@
 #         *) return;;
 #     esac
 # fi
+. ~/.nix-profile/etc/profile.d/nix.sh
 
 # source ~/dotfiles/base/lib/stdlib.sh
 # # don't put duplicate lines or lines starting with space in the history.

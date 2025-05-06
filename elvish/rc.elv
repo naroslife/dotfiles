@@ -4,6 +4,7 @@ epm:install &silent-if-installed github.com/iwoloschin/elvish-packages
 epm:install &silent-if-installed github.com/muesli/elvish-libs
 epm:install &silent-if-installed github.com/iandol/elvish-modules
 epm:install &silent-if-installed github.com/kolbycrouch/elvish-libs
+epm:install &silent-if-installed github.com/naroslife/elvish-modules
 
 use github.com/iwoloschin/elvish-packages/python
 use github.com/zzamboni/elvish-modules/alias
@@ -12,8 +13,8 @@ use github.com/zzamboni/elvish-modules/dir
 use github.com/zzamboni/elvish-modules/terminal-title
 use github.com/muesli/elvish-libs/git
 # use github.com/iandol/elvish-modules/cmds
-use naroslife/utilities/log
-use naroslife/utilities/you-should-use
+use github.com/naroslife/elvish-modules/log
+use github.com/naroslife/elvish-modules/you-should-use
 
 set paths = [~/.nvm/versions/node/v22.14.0/bin ~/.sdkman/candidates/gradle/current/bin ~/.local/usr/bin ~/.local/bin ~/.cargo/bin ~/.atuin/bin ~/.cargo/env ~/go/bin ~/.gem/ruby/(ruby -e 'print RUBY_VERSION')/bin $@paths]
 set-env XDG_CONFIG_HOME ~/.config

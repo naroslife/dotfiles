@@ -142,7 +142,7 @@ if confirm_dependencies; then
         fi
         if ! command -v starship &>/dev/null; then
             # Fix: Remove the -y flag from starship installation
-            safe_exec "curl -sS https://starship.rs/install.sh | sh" "install starship" 
+            safe_exec "curl -sS https://starship.rs/install.sh | sh -s -- -f" "install starship" 
         fi
         
         update_progress 30 "Installing Atuin and tools..."

@@ -25,7 +25,9 @@ fi
 if ! nix --version | grep -q "flakes"; then
     echo "📝 Enabling flakes and nix-command..."
     mkdir -p ~/.config/nix
-    echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    if ! grep -q "experimental-features = nix-command flakes" ~/.config/nix/nix.conf 2>/dev/null; then
+        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    fi
 fi
 
 # Initialize submodules if they exist

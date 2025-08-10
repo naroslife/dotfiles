@@ -1,7 +1,14 @@
+# Nix build artifacts
+result
+result-*
+
+# Home Manager generations
 .DS_Store
-tmux/plugins/
-raycast
-fzf
-history.txt
+
+# History files
 .history
-nix-export/
+history.txt
+
+# Temporary files
+*.tmp
+*.bak

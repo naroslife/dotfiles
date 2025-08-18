@@ -3,138 +3,212 @@
 
 set -euo pipefail
 
-# Colors for output
+# Colors and emojis for output (matching apply.sh style)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Function to print colored output
-print_info() { echo -e "${GREEN}✓${NC} $1"; }
-print_warn() { echo -e "${YELLOW}⚠${NC} $1"; }
-print_error() { echo -e "${RED}✗${NC} $1"; }
+print_info() { echo "✅ $1"; }
+print_warn() { echo "⚠️  $1"; }
+print_error() { echo "❌ $1"; }
 
 # Check if remote host is provided
 if [[ $# -ne 1 ]]; then
     print_error "Usage: $0 <user@host>"
-    echo "Example: $0 user@192.168.1.100"
+    echo "   Example: $0 user@192.168.1.100"
     exit 1
 fi
 
 REMOTE_HOST="$1"
 REMOTE_USER="${REMOTE_HOST%%@*}"
 
+echo "🚀 Deploying Home Manager configuration to ${REMOTE_HOST}..."
+
 # Verify SSH connection
-print_info "Testing SSH connection to ${REMOTE_HOST}..."
-if ! ssh -o ConnectTimeout=5 "${REMOTE_HOST}" "echo 'SSH connection successful'" &>/dev/null; then
+echo "🔌 Testing SSH connection..."
+if ! ssh -o ConnectTimeout=5 -o BatchMode=yes "${REMOTE_HOST}" "echo 'SSH connection successful'" &>/dev/null; then
     print_error "Cannot connect to ${REMOTE_HOST}. Please check SSH access."
+    echo "   Ensure you have SSH key authentication set up"
     exit 1
 fi
 
 # Check if Nix is installed locally
 if ! command -v nix &> /dev/null; then
-    print_error "Nix is not installed locally. Please install Nix first."
+    print_error "Nix is not installed locally. Please install Nix first:"
+    echo "   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install"
     exit 1
+fi
+
+# Check if flakes are enabled locally
+if ! nix --version | grep -q "flakes" 2>/dev/null; then
+    echo "📝 Enabling flakes and nix-command locally..."
+    mkdir -p ~/.config/nix
+    if ! grep -q "experimental-features = nix-command flakes" ~/.config/nix/nix.conf 2>/dev/null; then
+        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    fi
+fi
+
+# Initialize submodules if they exist
+if [[ -f ".gitmodules" ]]; then
+    echo "📦 Initializing git submodules..."
+    git submodule update --init --recursive
 fi
 
 # Build the Home Manager configuration locally
-print_info "Building Home Manager configuration locally..."
-BUILD_RESULT=$(nix build --no-link --print-out-paths .#homeConfigurations.naroslife.activationPackage 2>&1) || {
+echo "🔨 Building Home Manager configuration locally..."
+BUILD_OUTPUT=$(mktemp)
+if ! nix build --no-link --print-out-paths .#homeConfigurations.naroslife.activationPackage 2>&1 | tee "${BUILD_OUTPUT}"; then
     print_error "Failed to build configuration"
-    echo "$BUILD_RESULT"
+    rm -f "${BUILD_OUTPUT}"
     exit 1
-}
+fi
 
 # Extract the store path from build result
-STORE_PATH=$(echo "$BUILD_RESULT" | tail -n1)
+STORE_PATH=$(tail -n1 "${BUILD_OUTPUT}")
+rm -f "${BUILD_OUTPUT}"
 print_info "Built configuration at: ${STORE_PATH}"
 
 # Compute closure to get all dependencies
-print_info "Computing closure (all dependencies)..."
+echo "📊 Computing closure (all dependencies)..."
 CLOSURE=$(nix-store -qR "${STORE_PATH}")
 CLOSURE_SIZE=$(nix path-info -S "${STORE_PATH}" | awk '{print $2}')
 CLOSURE_SIZE_MB=$((CLOSURE_SIZE / 1024 / 1024))
-print_info "Total closure size: ${CLOSURE_SIZE_MB} MB"
+echo "📦 Total closure size: ${CLOSURE_SIZE_MB} MB"
 
-# Check if Nix is installed on remote
-print_info "Checking Nix installation on remote..."
-if ! ssh "${REMOTE_HOST}" "command -v nix" &>/dev/null; then
-    print_warn "Nix is not installed on remote. Installing Nix..."
+# Check if Determinate Nix is installed on remote
+echo "🔍 Checking Nix installation on remote..."
+REMOTE_HAS_NIX=$(ssh "${REMOTE_HOST}" "command -v nix >/dev/null 2>&1 && echo 'yes' || echo 'no'")
+
+if [[ "${REMOTE_HAS_NIX}" == "no" ]]; then
+    print_warn "Nix is not installed on remote."
+    echo "📥 Installing Determinate Systems' Nix on remote..."
     
-    # Copy and run Nix installer on remote
-    ssh "${REMOTE_HOST}" "sh <(curl -L https://nixos.org/nix/install) --daemon --yes" || {
+    # Download installer locally and copy to remote (for restricted environments)
+    echo "   Downloading installer locally first..."
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix -o /tmp/nix-installer.sh
+    
+    echo "   Copying installer to remote..."
+    scp /tmp/nix-installer.sh "${REMOTE_HOST}:/tmp/"
+    rm -f /tmp/nix-installer.sh
+    
+    echo "   Running installer on remote..."
+    ssh -t "${REMOTE_HOST}" "bash /tmp/nix-installer.sh install --no-confirm && rm -f /tmp/nix-installer.sh" || {
         print_error "Failed to install Nix on remote"
-        print_warn "You may need to install Nix manually on the remote machine"
-        print_warn "After installing, run this script again"
+        print_warn "You may need to install Nix manually on the remote machine:"
+        echo "   1. Copy the installer from https://install.determinate.systems/nix"
+        echo "   2. Run: sh nix-installer.sh install"
+        echo "   3. Re-run this deployment script"
         exit 1
     }
     
-    # Source nix profile on remote
-    ssh "${REMOTE_HOST}" ". ~/.nix-profile/etc/profile.d/nix.sh"
+    # Wait for daemon to start
+    echo "⏳ Waiting for Nix daemon to start..."
+    sleep 5
 fi
 
 # Enable flakes on remote if needed
-print_info "Ensuring flakes are enabled on remote..."
-ssh "${REMOTE_HOST}" "mkdir -p ~/.config/nix && echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf"
+echo "📝 Ensuring flakes are enabled on remote..."
+ssh "${REMOTE_HOST}" "mkdir -p ~/.config/nix && grep -q 'experimental-features = nix-command flakes' ~/.config/nix/nix.conf 2>/dev/null || echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf"
 
 # Copy the closure to remote machine
-print_info "Copying Nix store paths to remote (this may take a while)..."
-print_warn "Transferring ${CLOSURE_SIZE_MB} MB of data..."
+echo "📤 Copying Nix store paths to remote..."
+echo "   This may take a while (${CLOSURE_SIZE_MB} MB)..."
 
-# Use nix copy with SSH store
-nix copy --to "ssh://${REMOTE_HOST}" "${STORE_PATH}" --no-check-sigs || {
+# Use nix copy with SSH store - Determinate Nix supports this well
+if ! nix copy --to "ssh://${REMOTE_HOST}" "${STORE_PATH}" --no-check-sigs; then
     print_error "Failed to copy store paths to remote"
-    exit 1
-}
+    echo "   Trying alternative method..."
+    
+    # Alternative: use nix-store export/import
+    echo "📦 Creating NAR archive..."
+    NAR_FILE=$(mktemp -d)/closure.nar
+    nix-store --export $(nix-store -qR "${STORE_PATH}") > "${NAR_FILE}"
+    
+    echo "📤 Copying NAR archive to remote..."
+    scp "${NAR_FILE}" "${REMOTE_HOST}:/tmp/closure.nar"
+    
+    echo "📥 Importing on remote..."
+    ssh "${REMOTE_HOST}" "nix-store --import < /tmp/closure.nar && rm -f /tmp/closure.nar"
+    
+    rm -rf "$(dirname "${NAR_FILE}")"
+fi
 
 print_info "Store paths copied successfully"
 
-# Create activation script on remote
-print_info "Creating activation script on remote..."
-ACTIVATION_SCRIPT=$(cat <<'SCRIPT'
-#!/usr/bin/env bash
+# Copy the dotfiles repository to remote
+echo "📁 Syncing dotfiles repository to remote..."
+ssh "${REMOTE_HOST}" "mkdir -p ~/dotfiles"
+
+# Use rsync to efficiently copy files
+if command -v rsync &> /dev/null; then
+    rsync -av \
+        --exclude='.git' \
+        --exclude='result' \
+        --exclude='result-*' \
+        --exclude='*.swp' \
+        --exclude='.direnv' \
+        ./ "${REMOTE_HOST}:~/dotfiles/"
+else
+    # Fallback to tar over SSH
+    tar czf - \
+        --exclude='.git' \
+        --exclude='result' \
+        --exclude='result-*' \
+        . | ssh "${REMOTE_HOST}" "cd ~/dotfiles && tar xzf -"
+fi
+
+# Create and run activation script on remote
+echo "🎯 Activating configuration on remote..."
+ssh "${REMOTE_HOST}" bash <<REMOTE_SCRIPT
 set -euo pipefail
 
-STORE_PATH="$1"
-USER="$2"
-
-echo "Activating Home Manager configuration..."
+echo "🏠 Activating Home Manager configuration..."
 
 # Ensure user's nix profile exists
-mkdir -p /nix/var/nix/profiles/per-user/${USER}
+mkdir -p /nix/var/nix/profiles/per-user/${REMOTE_USER}
 
 # Create a profile link
-nix-env --profile /nix/var/nix/profiles/per-user/${USER}/home-manager --set "${STORE_PATH}"
+nix-env --profile /nix/var/nix/profiles/per-user/${REMOTE_USER}/home-manager --set "${STORE_PATH}"
 
 # Run the activation
 "${STORE_PATH}/activate"
 
-echo "✅ Home Manager configuration activated successfully!"
-echo "🎉 Please reload your shell or restart your terminal."
-SCRIPT
-)
+echo "✅ Home Manager configuration activated!"
+REMOTE_SCRIPT
 
-ssh "${REMOTE_HOST}" "cat > /tmp/activate-home-manager.sh" <<< "$ACTIVATION_SCRIPT"
-ssh "${REMOTE_HOST}" "chmod +x /tmp/activate-home-manager.sh"
+# Create update helper script on remote
+echo "📝 Creating update helper script on remote..."
+ssh "${REMOTE_HOST}" "cat > ~/dotfiles/update-from-local.sh" <<'UPDATE_SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Run activation on remote
-print_info "Activating configuration on remote..."
-ssh "${REMOTE_HOST}" "/tmp/activate-home-manager.sh '${STORE_PATH}' '${REMOTE_USER}'" || {
-    print_error "Failed to activate configuration"
-    exit 1
-}
+echo "🔄 This script should be run from a machine with internet access:"
+echo "   cd ~/dotfiles"
+echo "   ./deploy-remote.sh $(whoami)@$(hostname)"
+echo ""
+echo "Current activation package:"
+readlink -f ~/.nix-profile
+UPDATE_SCRIPT
 
-# Copy the dotfiles repository for future updates (optional)
-print_info "Copying dotfiles repository to remote..."
-ssh "${REMOTE_HOST}" "mkdir -p ~/dotfiles"
-rsync -av --exclude='.git' --exclude='result' ./ "${REMOTE_HOST}:~/dotfiles/" || {
-    print_warn "Failed to copy dotfiles repository (non-critical)"
-}
-
-# Clean up
-ssh "${REMOTE_HOST}" "rm -f /tmp/activate-home-manager.sh"
+ssh "${REMOTE_HOST}" "chmod +x ~/dotfiles/update-from-local.sh"
 
 print_info "Deployment complete! 🎉"
-print_info "The Home Manager environment is now active on ${REMOTE_HOST}"
-print_warn "Note: The remote machine won't be able to update or rebuild without network access"
-print_warn "To update, run this script again from an unrestricted machine"
+echo "📍 The Home Manager environment is now active on ${REMOTE_HOST}"
+echo ""
+echo "📚 Notes:"
+echo "   • The remote machine won't be able to update without network access"
+echo "   • To update, run this script again from an unrestricted machine"
+echo "   • Configuration is available at ~/dotfiles on the remote"
+
+if [[ -d "base" ]] && [[ -f "base/base.sh" ]]; then
+    echo "   • Base shell framework will be automatically sourced"
+fi
+
+if [[ -d "stdlib.sh" ]] && [[ -f "stdlib.sh/stdlib.sh" ]]; then
+    echo "   • Stdlib.sh will be automatically sourced"
+fi
+
+echo ""
+echo "🎉 Please reload your shell or restart your terminal on the remote machine."

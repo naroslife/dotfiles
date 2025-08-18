@@ -12,6 +12,9 @@
     ripgrep lazygit lazydocker xclip tealdeer shellcheck
     fd fzf eza most zoxide direnv
     
+    # History tools (conditionally installed based on programs config)
+    atuin mcfly
+    
     # WSL-specific utilities
     wslu        # WSL utilities (wslview, wslpath, wslvar)
     wl-clipboard # Wayland clipboard (backup for xclip)
@@ -29,11 +32,11 @@
     nmap xh bandwhich gping
     
     # Modern development tools
-    jdk17 maven gradle cmake ninja
-    gcc gdb clang-tools lldb cppcheck valgrind boost glibc.dev
+    jdk17 maven gradle
+    # gcc gdb clang-tools lldb cppcheck valgrind boost glibc.dev
     doxygen graphviz
     go nodejs rustup navi
-    
+        
     # Modern Git tools
     gh         # GitHub CLI
     git-absorb # Better git commit --fixup
@@ -56,8 +59,7 @@
     
     # Terminal tools and file managers
     tmux ranger carapace termscp
-    mcfly      # Neural network powered shell history
-    nushell    # Modern shell
+    # nushell    # Modern shell
     
     # Completion tools
     bash-completion zsh-completions
@@ -72,11 +74,17 @@
     
     # Productivity tools
     cheat      # Command cheatsheets
-    tldr       # Simplified man pages
     broot      # Interactive directory navigator
     
     # Archive tools
     unzip p7zip
+
+    (writeShellScriptBin "claude-code" ''
+      # Use npx to run the package (downloads/caches on first run)
+      exec ${nodejs}/bin/npx -y @anthropic-ai/claude-code "$@"
+      # For a pinned version, use:
+      # exec ${nodejs}/bin/npx -y @anthropic-ai/claude-code@<version> "$@"
+    '')
     
     # Python with packages (version 3.12.5 as per .tool-versions)
     (python3.withPackages (ps: with ps; [
@@ -101,10 +109,33 @@
   programs.bash = {
     enable = true;
     bashrcExtra = ''
-      # Source base.sh if available
-      if [ -f "$HOME/dotfiles/base/base.sh" ]; then
-        source "$HOME/dotfiles/base/base.sh"
+      # Source Nix
+      if [ -e "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh" ]; then
+        source "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh"
+      elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        source "$HOME/.nix-profile/etc/profile.d/nix.sh"
       fi
+
+      # Load Home Manager session variables (needed for non-login interactive shells)
+      if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+      fi
+
+      unset PKG_CONFIG_LIBDIR
+      
+      # PATH additions
+      export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$HOME/.npm-global/bin:./node_modules/.bin:$PATH
+      
+      # KUBECONFIG
+      export KUBECONFIG=~/.kube/config
+      
+      # FZF configuration
+      export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
+      
+      # Source base.sh if available
+      # if [ -f "$HOME/dotfiles/base/base.sh" ]; then
+      #   source "$HOME/dotfiles/base/base.sh"
+      # fi
       
       # Source stdlib.sh if available  
       if [ -f "$HOME/dotfiles/stdlib.sh/stdlib.sh" ]; then
@@ -117,14 +148,32 @@
       fi
       
       # WSL-specific initialization
-      if [[ -f "$HOME/dotfiles/wsl-init.sh" ]]; then
+      if [ -z "''${CLAUDE:-}" ] && [ -f "$HOME/dotfiles/wsl-init.sh" ]; then
         source "$HOME/dotfiles/wsl-init.sh"
       fi
       
-      # Modern history search with mcfly
-      if command -v mcfly >/dev/null 2>&1; then
-        eval "$(mcfly init bash)"
-      fi
+      # Custom functions
+      cx() { cd "$@" && l; }
+      fcd() { cd "$(find . -type d -not -path '*/.*' | fzf)" && l; }
+      f() { echo "$(find . -type f -not -path '*/.*' | fzf)" | xclip -selection clipboard; }
+      fv() { nvim "$(find . -type f -not -path '*/.*' | fzf)"; }
+      
+      # Ranger function with cd integration
+      function ranger {
+        local IFS=$'\t\n'
+        local tempfile="$(mktemp -t tmp.XXXXXX)"
+        local ranger_cmd=(
+          command
+          rangerq
+          --cmd="map Q chain shell echo %d > "$tempfile"; quitall"
+        )
+        
+        ''${ranger_cmd[@]} "$@"
+        if [[ -f "$tempfile" ]] && [[ "$(cat -- "$tempfile")" != "$(echo -n `pwd`)" ]]; then
+          cd -- "$(cat "$tempfile")" || return
+        fi
+        command rm -f -- "$tempfile" 2>/dev/null
+      }
       
       # Smart reminders for modern tools
       # Counter for tracking command usage
@@ -139,12 +188,15 @@
         echo "ps=0" >> ~/.command_counter
         echo "ping=0" >> ~/.command_counter
         echo "dig=0" >> ~/.command_counter
+        echo "git_diff=0" >> ~/.command_counter
         echo "man=0" >> ~/.command_counter
         echo "wc=0" >> ~/.command_counter
       fi
       
       # Function to show reminder and increment counter
       show_reminder() {
+        # Skip reminders if running under Claude (suppress noise)
+        if [ -n "''${CLAUDE:-}" ]; then return 0; fi
         local cmd="$1"
         local alternative="$2" 
         local description="$3"
@@ -163,7 +215,15 @@
       # Override cd to suggest broot occasionally
       cd() {
         show_reminder "cd" "br" "interactive directory navigation with broot"
-        builtin cd "$@"
+        if [ -z "''${CLAUDE:-}" ]; then
+          if command -v __zoxide_z >/dev/null 2>&1; then
+            __zoxide_z "$@"
+          else
+            builtin cd "$@"
+          fi
+        else
+          builtin cd "$@"
+        fi
       }
       
       # Override find to suggest fd
@@ -223,7 +283,181 @@
         show_reminder "wc" "tokei" "fast code line counter with language detection"
         command wc "$@"
       }
+      
+      # Git improvements (only show occasionally, not aliased)
+      git() {
+        if [[ "$1" == "diff" ]]; then
+          show_reminder "git_diff" "git difftool" "use delta for syntax-highlighted diffs"
+        fi
+        command git "$@"
+      }
+      
+      # Runtime history tool switcher (no rebuild needed)
+      switch_history() {
+        case "$1" in
+          atuin)
+            echo "🔄 Switching to Atuin (runtime)..."
+            # Reset any existing history tools
+            unset ATUIN_SESSION MCFLY_SESSION
+            # Initialize Atuin
+            if command -v atuin >/dev/null 2>&1; then
+              eval "$(atuin init bash)"
+              echo "✅ Atuin is now active! Try Ctrl+R"
+            else
+              echo "❌ Atuin not found. Make sure it's installed."
+            fi
+            ;;
+          mcfly)
+            echo "🔄 Switching to McFly (runtime)..."
+            # Reset any existing history tools
+            unset ATUIN_SESSION MCFLY_SESSION
+            # Initialize McFly
+            if command -v mcfly >/dev/null 2>&1; then
+              export MCFLY_KEY_SCHEME=vim
+              export MCFLY_FUZZY=2
+              eval "$(mcfly init bash)"
+              echo "✅ McFly is now active! Try Ctrl+R"
+            else
+              echo "❌ McFly not found. Make sure it's installed."
+            fi
+            ;;
+          status)
+            echo "📊 Current history tool status:"
+            if [ -n "$ATUIN_SESSION" ]; then
+              echo "  ✅ Atuin is active (session: ''${ATUIN_SESSION:0:8}...)"
+            elif command -v mcfly >/dev/null 2>&1 && [ -n "$MCFLY_SESSION" ]; then
+              echo "  ✅ McFly is active"
+            else
+              echo "  ❌ No history tool is currently active"
+              echo "  💡 Available tools:"
+              command -v atuin >/dev/null 2>&1 && echo "    - atuin"
+              command -v mcfly >/dev/null 2>&1 && echo "    - mcfly"
+            fi
+            ;;
+          *)
+            echo "Usage: switch_history {atuin|mcfly|status}"
+            echo "  atuin  - Switch to Atuin history search"
+            echo "  mcfly  - Switch to McFly history search"  
+            echo "  status - Show current active tool"
+            ;;
+        esac
+      }
+      
+      # Sudo wrapper that preserves Nix environment
+      # Usage: nsudo command [args...] - runs command with sudo while preserving Nix PATH
+      nsudo() {
+        if [ $# -eq 0 ]; then
+          echo "Usage: nsudo <command> [args...]"
+          echo "Runs command with sudo while preserving Nix tools in PATH"
+          return 1
+        fi
+        sudo env PATH="$PATH" "$@"
+      }
+      
+      # Alternative: sudo with preserved environment
+      # Usage: sudo-nix command [args...] - same as nsudo but different name
+      sudo-nix() {
+        nsudo "$@"
+      }
+      
+      # History tool aliases (consistent with zsh)
+      alias use-atuin='switch_history atuin'
+      alias use-mcfly='switch_history mcfly'
+      alias history-status='switch_history status'
+      set +u
     '';
+
+    shellAliases = {
+      # Home Manager
+      hm = "nix run home-manager/master -- switch --flake . --impure";
+      
+      # Runtime history tool switching (consistent across shells)
+      use-atuin = "switch_history atuin";
+      use-mcfly = "switch_history mcfly";
+      history-status = "switch_history status";
+      
+      # Sudo with Nix environment preservation
+      nsudo = "sudo env PATH=$PATH";
+      sudo-nix = "sudo env PATH=$PATH";
+      
+      # File operations
+      la = "tree";
+      cat = "bat";
+      l = "eza -l --icons --git -a";
+      lt = "eza --tree --level=2 --long --icons --git";
+      ltree = "eza --tree --level=2 --icons --git";
+
+      # File operations with modern tools
+      find = "fd";
+      grep = "rg";
+      ls = "eza";
+      
+      # Git aliases
+      gc = "git commit -m";
+      gca = "git commit -a -m";
+      gp = "git push origin HEAD";
+      gpu = "git pull origin";
+      gst = "git status";
+      glog = "git log --graph --topo-order --pretty='%w(100,0,6)%C(yellow)%h%C(bold)%C(black)%d %C(cyan)%ar %C(green)%an%n%C(bold)%C(white)%s %N' --abbrev-commit";
+      gdiff = "git diff";
+      gco = "git checkout";
+      gb = "git branch";
+      gba = "git branch -a";
+      gadd = "git add";
+      ga = "git add -p";
+      gcoall = "git checkout -- .";
+      gr = "git remote";
+      gre = "git reset";
+      
+      # Docker
+      dco = "docker compose";
+      dps = "docker ps";
+      dpa = "docker ps -a";
+      dl = "docker ps -l -q";
+      dx = "docker exec -it";
+      
+      # Directory navigation
+      ".." = "cd ..";
+      "..." = "cd ../..";
+      "...." = "cd ../../..";
+      "....." = "cd ../../../..";
+      "......" = "cd ../../../../..";
+      
+      # K8s
+      k = "kubectl";
+      ka = "kubectl apply -f";
+      kg = "kubectl get";
+      kd = "kubectl describe";
+      kdel = "kubectl delete";
+      kl = "kubectl logs -f";
+      kgpo = "kubectl get pod";
+      kgd = "kubectl get deployments";
+      kc = "kubectx";
+      ke = "kubectl exec -it";
+      kcns = "kubectl config set-context --current --namespace";
+      
+      # Misc
+      http = "xh";
+      cl = "clear";
+      v = "nvim";
+      nm = "nmap -sC -sV -oN nmap";
+      rr = "ranger";
+      
+      # Modern CLI replacements
+      df = "duf";
+      du = "dust";
+      ps = "procs";
+      top = "btm";
+      htop = "btm";
+      ping = "gping";
+      dig = "dog";
+      
+      # Git improvements
+      gd = "git diff";
+      gdt = "git difftool";
+    
+    };
+
   };
 
   programs.zsh = {
@@ -233,6 +467,18 @@
     syntaxHighlighting.enable = true;
     
     shellAliases = {
+      # Home Manager
+      hm = "nix run home-manager/master -- switch --flake . --impure";
+      
+      # Runtime history tool switching (consistent across shells)
+      use-atuin = "switch_history atuin";
+      use-mcfly = "switch_history mcfly";
+      history-status = "switch_history status";
+      
+      # Sudo with Nix environment preservation
+      nsudo = "sudo env PATH=$PATH";
+      sudo-nix = "sudo env PATH=$PATH";
+      
       # File operations
       la = "tree";
       cat = "bat";
@@ -312,8 +558,22 @@
     };
     
     initExtra = ''
+      # Source Nix
+      if [ -e "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh" ]; then
+        source "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh"
+      elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+      fi
+      
+      # Load Home Manager session variables (needed for non-login interactive shells)
+      if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+      fi
+
+      unset PKG_CONFIG_LIBDIR
+      
       # VI mode
-      bindkey jj vi-cmd-mode
+      # bindkey jj vi-cmd-mode
       
       # Key bindings
       bindkey '^w' autosuggest-execute
@@ -322,6 +582,35 @@
       bindkey '^L' vi-forward-word
       bindkey '^k' up-line-or-search
       bindkey '^j' down-line-or-search
+      
+      # PATH additions
+      export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$HOME/.npm-global/bin:./node_modules/.bin:$PATH
+      
+      # KUBECONFIG
+      export KUBECONFIG=~/.kube/config
+      
+      # FZF configuration
+      export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
+      
+      # Source base.sh if available
+      # if [ -f "$HOME/dotfiles/base/base.sh" ]; then
+      #   source "$HOME/dotfiles/base/base.sh"
+      # fi
+      
+      # Source stdlib.sh if available  
+      if [ -f "$HOME/dotfiles/stdlib.sh/stdlib.sh" ]; then
+        source "$HOME/dotfiles/stdlib.sh/stdlib.sh"
+      fi
+      
+      # Initialize carapace completion for zsh
+      if command -v carapace >/dev/null 2>&1; then
+        source <(carapace _carapace zsh)
+      fi
+      
+      # WSL-specific initialization
+      if [ -z "''${CLAUDE:-}" ] && [ -f "$HOME/dotfiles/wsl-init.sh" ]; then
+        source "$HOME/dotfiles/wsl-init.sh"
+      fi
       
       # Custom functions
       cx() { cd "$@" && l; }
@@ -346,35 +635,6 @@
         command rm -f -- "$tempfile" 2>/dev/null
       }
       
-      # FZF configuration
-      export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
-      
-      # PATH additions
-      export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$PATH
-      
-      # KUBECONFIG
-      export KUBECONFIG=~/.kube/config
-      
-      # Source base.sh if available
-      if [ -f "$HOME/dotfiles/base/base.sh" ]; then
-        source "$HOME/dotfiles/base/base.sh"
-      fi
-      
-      # Source stdlib.sh if available  
-      if [ -f "$HOME/dotfiles/stdlib.sh/stdlib.sh" ]; then
-        source "$HOME/dotfiles/stdlib.sh/stdlib.sh"
-      fi
-      
-      # Initialize carapace completion for zsh
-      if command -v carapace >/dev/null 2>&1; then
-        source <(carapace _carapace zsh)
-      fi
-      
-      # Modern history search with mcfly
-      if command -v mcfly >/dev/null 2>&1; then
-        eval "$(mcfly init zsh)"
-      fi
-      
       # Smart reminders for modern tools
       # Counter for tracking command usage
       if [[ ! -f ~/.command_counter ]]; then
@@ -395,6 +655,8 @@
       
       # Function to show reminder and increment counter
       show_reminder() {
+        # Skip reminders if running under Claude (suppress noise)
+        if [ -n "''${CLAUDE:-}" ]; then return 0; fi
         local cmd="$1"
         local alternative="$2" 
         local description="$3"
@@ -414,7 +676,15 @@
       # Directory navigation
       function cd() {
         show_reminder "cd" "br" "interactive directory navigation with broot"
-        builtin cd "$@"
+        if [ -z "''${CLAUDE:-}" ]; then
+          if command -v __zoxide_z >/dev/null 2>&1; then
+            __zoxide_z "$@"
+          else
+            builtin cd "$@"
+          fi
+        else
+          builtin cd "$@"
+        fi
       }
       
       # File operations
@@ -486,6 +756,75 @@
         fi
         command git "$@"
       }
+      
+      # Runtime history tool switcher (same as bash)
+      switch_history() {
+        case "$1" in
+          atuin)
+            echo "🔄 Switching to Atuin (runtime)..."
+            # Reset any existing history tools
+            unset ATUIN_SESSION MCFLY_SESSION
+            # Initialize Atuin
+            if command -v atuin >/dev/null 2>&1; then
+              eval "$(atuin init zsh)"
+              echo "✅ Atuin is now active! Try Ctrl+R"
+            else
+              echo "❌ Atuin not found. Make sure it's installed."
+            fi
+            ;;
+          mcfly)
+            echo "🔄 Switching to McFly (runtime)..."
+            # Reset any existing history tools
+            unset ATUIN_SESSION MCFLY_SESSION
+            # Initialize McFly
+            if command -v mcfly >/dev/null 2>&1; then
+              export MCFLY_KEY_SCHEME=vim
+              export MCFLY_FUZZY=2
+              eval "$(mcfly init zsh)"
+              echo "✅ McFly is now active! Try Ctrl+R"
+            else
+              echo "❌ McFly not found. Make sure it's installed."
+            fi
+            ;;
+          status)
+            echo "📊 Current history tool status:"
+            if [ -n "$ATUIN_SESSION" ]; then
+              echo "  ✅ Atuin is active (session: ''${ATUIN_SESSION:0:8}...)"
+            elif command -v mcfly >/dev/null 2>&1 && [ -n "$MCFLY_SESSION" ]; then
+              echo "  ✅ McFly is active"
+            else
+              echo "  ❌ No history tool is currently active"
+              echo "  💡 Available tools:"
+              command -v atuin >/dev/null 2>&1 && echo "    - atuin"
+              command -v mcfly >/dev/null 2>&1 && echo "    - mcfly"
+            fi
+            ;;
+          *)
+            echo "Usage: switch_history {atuin|mcfly|status}"
+            echo "  atuin  - Switch to Atuin history search"
+            echo "  mcfly  - Switch to McFly history search"  
+            echo "  status - Show current active tool"
+            ;;
+        esac
+      }
+      
+      # Sudo wrapper that preserves Nix environment
+      # Usage: nsudo command [args...] - runs command with sudo while preserving Nix PATH
+      nsudo() {
+        if [ $# -eq 0 ]; then
+          echo "Usage: nsudo <command> [args...]"
+          echo "Runs command with sudo while preserving Nix tools in PATH"
+          return 1
+        fi
+        sudo env PATH="$PATH" "$@"
+      }
+      
+      # Alternative: sudo with preserved environment
+      # Usage: sudo-nix command [args...] - same as nsudo but different name
+      sudo-nix() {
+        nsudo "$@"
+      }
+      set +u
     '';
   };
 
@@ -515,16 +854,16 @@
   };
 
   programs.direnv = {
-    enable = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
+    enable = false;
+    enableBashIntegration = false;
+    enableZshIntegration = false;
   };
 
   programs.git = {
     enable = true;
     extraConfig = {
       core = {
-        editor = "nvim";
+        editor = "code";
         autocrlf = "input";  # WSL: Handle line endings properly
         safecrlf = true;     # WSL: Warn about mixed line endings
       };
@@ -533,7 +872,6 @@
       pull.rebase = false;
       merge.conflictstyle = "diff3";
       rerere.enabled = true;
-      interactive.diffFilter = "delta --color-only";
       diff.colorMoved = "default";
     };
     delta = {
@@ -555,7 +893,6 @@
 
   programs.neovim = {
     enable = true;
-    defaultEditor = true;
     viAlias = true;
     vimAlias = true;
   };
@@ -599,10 +936,7 @@
     
     # SSH config
     ".ssh/config".source = ./ssh/ssh-config;
-    
-    # Tmux config
-    ".tmux.conf".source = ./tmux/tmux.conf;
-    
+        
     # Tmuxinator configs
     ".config/tmuxinator" = {
       source = ./tmuxinator;
@@ -648,26 +982,41 @@
       cpu_core_colors = ["LightMagenta", "LightYellow", "LightCyan", "LightGreen", "LightBlue", "LightRed", "Cyan", "Green", "Blue", "Red"]
     '';
     
+    # NPM configuration
+    ".npmrc".text = ''
+      prefix=''${HOME}/.npm-global
+    '';
+    
   };
 
   # Environment variables
   home.sessionVariables = {
-    EDITOR = "nvim";
-    BROWSER = "firefox";
-    TERMINAL = "alacritty";
+    EDITOR = "code";
+    # BROWSER = "firefox";
+    # TERMINAL = "alacritty";
     KUBECONFIG = "$HOME/.kube/config";
     XDG_CONFIG_HOME = "$HOME/.config";
     FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow";
-    STARSHIP_CONFIG = "$HOME/.config/starship/starship.toml";
+    # STARSHIP_CONFIG = "$HOME/.config/starship/starship.toml";
+
+    # Prefer system pkg-config and ensure Ubuntu pc dirs are visible
+    PKG_CONFIG = "/usr/bin/pkg-config";
+    PKG_CONFIG_PATH = "/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig:/usr/lib/pkgconfig";
     
     # Modern CLI tool configurations
     BAT_THEME = "base16";
     DELTA_FEATURES = "+side-by-side";
     
+    # NPM configuration for user-level global installs
+    NPM_CONFIG_PREFIX = "$HOME/.npm-global";
+    
     # WSL-specific optimizations
     WSLENV = "PATH/l:XDG_CONFIG_HOME/up";
     # Improve performance by using Windows TEMP for temporary files
     TMPDIR = "/tmp";
+
+    # Add custom library paths (keeps existing LD_LIBRARY_PATH if set)
+    LD_LIBRARY_PATH = "${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freediameter/lib:${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freeradius/lib:$LD_LIBRARY_PATH";
   };
 
   # Additional modern programs
@@ -677,14 +1026,14 @@
     enableZshIntegration = true;
   };
   
-  programs.nushell = {
-    enable = true;
-  };
+  # programs.nushell = {
+  #   enable = true;
+  # };
   
   programs.mcfly = {
-    enable = true;
-    enableBashIntegration = true;
-    enableZshIntegration = true;
+    enable = false;
+    enableBashIntegration = false;
+    enableZshIntegration = false;
     keyScheme = "vim";
     fuzzySearchFactor = 2;
   };

@@ -124,7 +124,7 @@
       unset PKG_CONFIG_LIBDIR
       
       # PATH additions
-      export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$HOME/.npm-global/bin:./node_modules/.bin:$PATH
+      export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$HOME/.npm-global/bin:./node_modules/.bin:$PATH
       
       # KUBECONFIG
       export KUBECONFIG=~/.kube/config
@@ -582,9 +582,12 @@
       bindkey '^L' vi-forward-word
       bindkey '^k' up-line-or-search
       bindkey '^j' down-line-or-search
+      bindkey '^W' backward-kill-word
+      bindkey "^[[1;5C" forward-word
+      bindkey "^[[1;5D" backward-word
       
       # PATH additions
-      export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$HOME/.npm-global/bin:./node_modules/.bin:$PATH
+      export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$HOME/.npm-global/bin:./node_modules/.bin:$PATH
       
       # KUBECONFIG
       export KUBECONFIG=~/.kube/config
@@ -598,9 +601,9 @@
       # fi
       
       # Source stdlib.sh if available  
-      if [ -f "$HOME/dotfiles/stdlib.sh/stdlib.sh" ]; then
-        source "$HOME/dotfiles/stdlib.sh/stdlib.sh"
-      fi
+      # if [ -f "$HOME/dotfiles/stdlib.sh/stdlib.sh" ]; then
+      #   source "$HOME/dotfiles/stdlib.sh/stdlib.sh"
+      # fi
       
       # Initialize carapace completion for zsh
       if command -v carapace >/dev/null 2>&1; then
@@ -1014,6 +1017,7 @@
     WSLENV = "PATH/l:XDG_CONFIG_HOME/up";
     # Improve performance by using Windows TEMP for temporary files
     TMPDIR = "/tmp";
+    PATH = "$HOME/.local/bin:$PATH";
 
     # Add custom library paths (keeps existing LD_LIBRARY_PATH if set)
     LD_LIBRARY_PATH = "${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freediameter/lib:${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freeradius/lib:$LD_LIBRARY_PATH";

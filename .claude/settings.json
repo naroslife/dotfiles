@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch",
+      "Bash"
+    ],
+    "deny": []
+  },
+  "model": "opus",
+  "statusLine": {
+    "type": "command",
+    "command": "bash /home/naroslife/.claude/statusline-starship.sh"
+  },
+  "env": {
+    "USE_BUILTIN_RIPGREP": "1",
+    "CLAUDE": "true"
+  }
+}

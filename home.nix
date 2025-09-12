@@ -1,9 +1,14 @@
+
 { config, pkgs, lib, ... }:
 
+let
+  user = builtins.getEnv "USER";
+  homeDir = builtins.getEnv "HOME";
+in
 {
   home.stateVersion = "25.05";
-  home.username = "naroslife";
-  home.homeDirectory = "/home/naroslife";
+  home.username = if user != "" then user else "naroslife";
+  home.homeDirectory = if homeDir != "" then homeDir else "/home/naroslife";
 
   # Packages
   home.packages = with pkgs; [

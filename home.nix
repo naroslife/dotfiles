@@ -1,5 +1,4 @@
-
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, nurPackages ? {}, waylandPackages ? {}, pythonPackages ? {}, ... }:
 
 let
   user = builtins.getEnv "USER";

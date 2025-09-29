@@ -12,6 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.editorconfig` for consistent code formatting
 - Flake checks for automated validation
 - CHANGELOG.md to track project changes
+- `docs/PERFORMANCE.md` documenting all performance optimizations
+- Lazy-loading for Carapace completions (bash and zsh)
+- ZSH history substring search and optimized autosuggestions
+
+### Performance
+- Lazy-load Carapace completions (saves ~100-200ms on shell startup)
+- Reduced Starship command timeout from 2000ms to 500ms
+- Disabled Atuin auto-sync for faster startup (manual sync available)
+- Reduced Atuin sync frequency from 5m to 1h
+- Added scan_timeout to Starship (30ms)
+- Optimized function sourcing with conditional checks
+- ZSH: Skip global compinit for faster startup
+- ZSH: Move history to ~/.cache for better I/O performance
+- ZSH: Optimized autosuggestion strategy (history-first)
 
 ### Changed
 - Locale configuration changed from `en_US.UTF-8` to `C.UTF-8` for better WSL compatibility

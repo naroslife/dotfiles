@@ -6,10 +6,27 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
+    # Performance optimizations
+    autosuggestion.strategy = [ "history" "completion" ];
+    historySubstringSearch.enable = true;
+
+    # History settings for better performance
+    history = {
+      size = 50000;
+      save = 50000;
+      path = "${config.home.homeDirectory}/.cache/zsh/history";
+      ignoreDups = true;
+      ignoreSpace = true;
+      share = true;
+    };
+
     # shellAliases are configured in aliases.nix
 
     initContent = lib.mkMerge [
       (lib.mkBefore ''
+        # Performance: Skip system-wide compinit
+        skip_global_compinit=1
+
         # Source Nix
         if [ -e "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh" ]; then
           source "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh"
@@ -45,9 +62,16 @@
         # FZF configuration
         export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
 
-        # Initialize carapace completion for zsh
+        # Lazy-load carapace completion for zsh (only when needed)
         if command -v carapace >/dev/null 2>&1; then
-          source <(carapace _carapace zsh)
+          _carapace_lazy() {
+            source <(carapace _carapace zsh)
+            unfunction _carapace_lazy
+            # Trigger the completion
+            zle expand-or-complete
+          }
+          zle -N _carapace_lazy
+          bindkey '^I' _carapace_lazy
         fi
 
         # WSL-specific initialization
@@ -55,16 +79,18 @@
           source "$HOME/dotfiles/wsl-init.sh"
         fi
 
-        # Source custom functions (skip bash-specific files)
-        for func_file in "$HOME/dotfiles/scripts/functions"/*.sh; do
-          if [[ -f "$func_file" && "$func_file" != *"history-tools.sh" ]]; then
-            source "$func_file"
-          fi
-        done
+        # Lazy-load custom functions (only source if directory exists and has files)
+        if [ -d "$HOME/dotfiles/scripts/functions" ] && [ -n "$(ls -A "$HOME/dotfiles/scripts/functions"/*.sh 2>/dev/null)" ]; then
+          for func_file in "$HOME/dotfiles/scripts/functions"/*.sh; do
+            if [[ -f "$func_file" && "$func_file" != *"history-tools.sh" ]]; then
+              source "$func_file"
+            fi
+          done
 
-        # Source zsh-specific history tools
-        if [ -f "$HOME/dotfiles/scripts/functions/history-tools-zsh.sh" ]; then
-          source "$HOME/dotfiles/scripts/functions/history-tools-zsh.sh"
+          # Source zsh-specific history tools
+          if [ -f "$HOME/dotfiles/scripts/functions/history-tools-zsh.sh" ]; then
+            source "$HOME/dotfiles/scripts/functions/history-tools-zsh.sh"
+          fi
         fi
 
         # Override cd function for zsh (similar to bash but with zsh syntax)

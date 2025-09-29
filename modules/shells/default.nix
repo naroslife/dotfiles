@@ -27,7 +27,9 @@
     enableBashIntegration = true;
     enableZshIntegration = true;
     settings = {
-      command_timeout = 2000;
+      # Performance optimizations
+      command_timeout = 500; # Reduced from 2000ms
+      scan_timeout = 30; # Timeout for scanning files
       format = ''
         [░▒▓](#a3aed2)[  ](bg:#a3aed2 fg:#090c0c)[](bg:#769ff0 fg:#a3aed2)$directory[](fg:#769ff0 bg:#394260)$git_branch[](fg:#394260 bg:#212736)$nodejs$rust$golang$php[](fg:#212736 bg:#1d2230)$time[ ](fg:#1d2230)
         $character'';
@@ -101,9 +103,9 @@
     enableZshIntegration = true;
     settings = {
       # General settings
-      auto_sync = true;
+      auto_sync = false; # Disable auto-sync for faster startup
       update_check = false;
-      sync_frequency = "5m";
+      sync_frequency = "1h"; # Reduced from 5m
       sync_address = "https://api.atuin.sh";
 
       # Search settings
@@ -113,6 +115,10 @@
       style = "compact";
       inline_height = 10;
       show_preview = true;
+
+      # Performance settings
+      max_preview_height = 4; # Limit preview height for faster rendering
+      prefers_reduced_motion = false;
 
       # History settings
       history_filter = [

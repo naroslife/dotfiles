@@ -33,22 +33,29 @@
       #   source "$HOME/dotfiles/stdlib.sh/stdlib.sh"
       # fi
 
-      # Initialize carapace completion
-      if command -v carapace >/dev/null 2>&1; then
-        source <(carapace _carapace)
-      fi
+      # Lazy-load carapace completion (only when needed)
+      _lazy_load_carapace() {
+        if command -v carapace >/dev/null 2>&1; then
+          source <(carapace _carapace)
+          unset -f _lazy_load_carapace
+        fi
+      }
+      # Trigger on first tab completion
+      complete -F _lazy_load_carapace -D
 
       # WSL-specific initialization
       if [ -z "''${CLAUDE:-}" ] && [ -f "$HOME/dotfiles/wsl-init.sh" ]; then
         source "$HOME/dotfiles/wsl-init.sh"
       fi
 
-      # Source custom functions
-      for func_file in "$HOME/dotfiles/scripts/functions"/*.sh; do
-        if [ -f "$func_file" ]; then
-          source "$func_file"
-        fi
-      done
+      # Lazy-load custom functions (only source if directory exists and has files)
+      if [ -d "$HOME/dotfiles/scripts/functions" ] && [ -n "$(ls -A "$HOME/dotfiles/scripts/functions"/*.sh 2>/dev/null)" ]; then
+        for func_file in "$HOME/dotfiles/scripts/functions"/*.sh; do
+          if [ -f "$func_file" ]; then
+            source "$func_file"
+          fi
+        done
+      fi
 
       # History tool aliases (consistent with zsh)
       alias use-atuin='switch_history atuin'

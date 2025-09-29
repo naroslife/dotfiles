@@ -1,16 +1,11 @@
 { config, pkgs, lib, ... }:
-let
-  username = config.home.username or "user";
-  homeDir = config.home.homeDirectory or "/home/${username}";
-in
 {
   # Import all modules
   imports = [ ./modules ];
 
   # Home Manager configuration
   home.stateVersion = "25.05";
-  home.username = username;
-  home.homeDirectory = homeDir;
+  # Username and homeDirectory are set by the flake
 
   # Let home-manager manage itself
   programs.home-manager.enable = true;
@@ -46,22 +41,22 @@ in
   # XDG configuration
   xdg = {
     enable = true;
-    configHome = "${homeDir}/.config";
-    dataHome = "${homeDir}/.local/share";
-    stateHome = "${homeDir}/.local/state";
-    cacheHome = "${homeDir}/.cache";
+    configHome = "${config.home.homeDirectory}/.config";
+    dataHome = "${config.home.homeDirectory}/.local/share";
+    stateHome = "${config.home.homeDirectory}/.local/state";
+    cacheHome = "${config.home.homeDirectory}/.cache";
 
     userDirs = {
       enable = true;
       createDirectories = true;
-      desktop = "${homeDir}/Desktop";
-      download = "${homeDir}/Downloads";
-      documents = "${homeDir}/Documents";
-      music = "${homeDir}/Music";
-      pictures = "${homeDir}/Pictures";
-      videos = "${homeDir}/Videos";
-      publicShare = "${homeDir}/Public";
-      templates = "${homeDir}/Templates";
+      desktop = "${config.home.homeDirectory}/Desktop";
+      download = "${config.home.homeDirectory}/Downloads";
+      documents = "${config.home.homeDirectory}/Documents";
+      music = "${config.home.homeDirectory}/Music";
+      pictures = "${config.home.homeDirectory}/Pictures";
+      videos = "${config.home.homeDirectory}/Videos";
+      publicShare = "${config.home.homeDirectory}/Public";
+      templates = "${config.home.homeDirectory}/Templates";
     };
   };
 

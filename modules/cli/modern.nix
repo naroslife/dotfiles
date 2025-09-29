@@ -41,7 +41,7 @@
 
   # Modern tool configurations
   home.sessionVariables = {
-    BAT_THEME = "base16";
+    # BAT_THEME is configured in modules/environment.nix
     DELTA_FEATURES = "+side-by-side";
   };
 

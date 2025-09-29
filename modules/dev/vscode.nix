@@ -4,7 +4,7 @@
     enable = true;
 
     # User settings
-    userSettings = {
+    profiles.default.userSettings = {
       # Editor settings
       "editor.fontFamily" = "'FiraCode Nerd Font', 'MesloLGS NF', 'Cascadia Code', monospace";
       "editor.fontSize" = 14;
@@ -163,7 +163,7 @@
     };
 
     # VS Code extensions
-    extensions = with pkgs.vscode-extensions; [
+    profiles.default.extensions = with pkgs.vscode-extensions; [
       # General development
       editorconfig.editorconfig
       streetsidesoftware.code-spell-checker
@@ -178,7 +178,6 @@
 
       # Themes and icons
       pkief.material-icon-theme
-      monokai.theme-monokai-pro-vscode
 
       # Language support
       ms-python.python
@@ -227,7 +226,7 @@
     ];
 
     # Keybindings
-    keybindings = [
+    profiles.default.keybindings = [
       {
         key = "ctrl+shift+/";
         command = "editor.action.blockComment";

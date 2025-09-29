@@ -1,7 +1,4 @@
 { config, pkgs, lib, ... }:
-let
-  aliases = import ./aliases.nix { inherit config pkgs lib; };
-in
 {
   programs.zsh = {
     enable = true;
@@ -9,7 +6,7 @@ in
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
-    shellAliases = aliases.shellAliases;
+    # shellAliases are configured in aliases.nix
 
     initExtraFirst = ''
       # Source Nix

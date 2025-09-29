@@ -18,7 +18,7 @@
     carapace
 
     # Shell enhancements
-    thefuck    # Correct previous commands
+    # thefuck removed - incompatible with python 3.12+
     mcfly      # Smart command history
   ];
 

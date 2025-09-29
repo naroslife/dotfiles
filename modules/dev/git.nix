@@ -130,7 +130,7 @@
         autocrlf = "input";  # WSL: Handle line endings properly
         safecrlf = true;     # WSL: Warn about mixed line endings
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
-        pager = "delta";
+        filemode = false;    # Better handling of file permissions
       };
 
       init = {
@@ -194,9 +194,6 @@
           new = "green bold";
         };
       };
-
-      # Better handling of file permissions
-      filemode = false;
 
       # URL rewrites for better security
       url = {

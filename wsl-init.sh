@@ -7,8 +7,6 @@ is_wsl() {
 }
 
 if is_wsl; then
-	echo "🔧 WSL environment detected - applying optimizations..."
-
 	# Set up Windows PATH integration (if needed)
 	if [[ -d "/mnt/c/Windows/System32" ]]; then
 		export PATH="$PATH:/mnt/c/Windows/System32"
@@ -21,23 +19,32 @@ if is_wsl; then
 	# Open files/URLs in Windows default applications
 	alias open='wslview'
 
-	# Auto-run APT network switch once per day (Continental/WSL specific)
-	if command -v apt-network-switch &>/dev/null; then
-		APT_LAST_CHECK_FILE="$HOME/.cache/apt-network-last-check"
-		TODAY=$(date +%Y-%m-%d)
+	# Check if we should show daily messages
+	WSL_MESSAGES_FILE="$HOME/.cache/wsl-messages-last-shown"
+	TODAY=$(date +%Y-%m-%d)
+	SHOW_MESSAGES=false
 
-		# Create cache directory if it doesn't exist
-		mkdir -p "$HOME/.cache"
+	# Create cache directory if it doesn't exist
+	mkdir -p "$HOME/.cache"
 
-		# Check if we've already run today
-		if [[ ! -f "$APT_LAST_CHECK_FILE" ]] || [[ "$(cat "$APT_LAST_CHECK_FILE" 2>/dev/null)" != "$TODAY" ]]; then
+	# Check if we've already shown messages today
+	if [[ ! -f "$WSL_MESSAGES_FILE" ]] || [[ "$(cat "$WSL_MESSAGES_FILE" 2>/dev/null)" != "$TODAY" ]]; then
+		SHOW_MESSAGES=true
+		echo "$TODAY" >"$WSL_MESSAGES_FILE"
+	fi
+
+	# Show messages only once per day
+	if [ "$SHOW_MESSAGES" = true ]; then
+		echo "🔧 WSL environment detected - applying optimizations..."
+
+		# Auto-run APT network switch once per day (Continental/WSL specific)
+		if command -v apt-network-switch &>/dev/null; then
 			echo "🔄 Running daily APT network configuration check..."
 
 			# Run the check in background to not block shell startup
 			(
 				apt-network-switch &>/dev/null
 				if [ $? -eq 0 ]; then
-					echo "$TODAY" >"$APT_LAST_CHECK_FILE"
 					echo "✅ APT repositories configured for today's network"
 				fi
 			) &
@@ -45,15 +52,15 @@ if is_wsl; then
 			# Give it a moment to complete (but don't wait if it's slow)
 			sleep 0.5
 		fi
-	fi
 
-	# WSL utilities reminders
-	echo "💡 WSL Tool Reminders:"
-	echo "  wslview <file>     - Open file in Windows default app"
-	echo "  wslpath <path>     - Convert between Windows and WSL paths"
-	echo "  wslvar <var>       - Access Windows environment variables"
-	echo "  clip.exe           - Copy to Windows clipboard"
-	echo ""
+		# WSL utilities reminders
+		echo "💡 WSL Tool Reminders:"
+		echo "  wslview <file>     - Open file in Windows default app"
+		echo "  wslpath <path>     - Convert between Windows and WSL paths"
+		echo "  wslvar <var>       - Access Windows environment variables"
+		echo "  clip.exe           - Copy to Windows clipboard"
+		echo ""
+	fi
 
 	# Performance optimizations
 	export WSLENV="PATH/l:XDG_CONFIG_HOME/up"

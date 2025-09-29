@@ -15,13 +15,24 @@
     WSLENV = "PATH/l:XDG_CONFIG_HOME/up";
     # Improve performance by using Windows TEMP for temporary files
     TMPDIR = "/tmp";
+    PATH = "$HOME/.local/bin:$PATH";
 
     # Add custom library paths (keeps existing LD_LIBRARY_PATH if set)
     LD_LIBRARY_PATH = "${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freediameter/lib:${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freeradius/lib:$LD_LIBRARY_PATH";
   };
 
   # WSL-specific aliases
-  home.shellAliases = {
+  programs.bash.shellAliases = {
+    # Clipboard integration aliases for WSL
+    pbcopy = "clip.exe";
+    pbpaste = "powershell.exe Get-Clipboard";
+
+    # Windows app shortcuts
+    code = "code.exe";
+    explorer = "explorer.exe";
+  };
+
+  programs.zsh.shellAliases = {
     # Clipboard integration aliases for WSL
     pbcopy = "clip.exe";
     pbpaste = "powershell.exe Get-Clipboard";

@@ -3,26 +3,26 @@
   programs.ssh = {
     enable = true;
 
-    # Agent configuration
-    forwardAgent = true;
-    addKeysToAgent = "yes";
-
-    # Connection settings
-    serverAliveInterval = 15;
-    serverAliveCountMax = 3;
-
-    # Security settings
-    hashKnownHosts = true;
-
-    # Control master for connection sharing (huge performance boost)
-    controlMaster = "auto";
-    controlPath = "~/.ssh/control-%r@%h:%p";
-    controlPersist = "10m";
-
     # Global match blocks
     matchBlocks = {
       # Default settings for all hosts
       "*" = {
+        # Control master for connection sharing (huge performance boost)
+        controlMaster = "auto";
+        controlPath = "~/.ssh/control-%r@%h:%p";
+        controlPersist = "10m";
+
+        # Agent configuration
+        forwardAgent = true;
+        addKeysToAgent = "yes";
+
+        # Connection settings
+        serverAliveInterval = 15;
+        serverAliveCountMax = 3;
+
+        # Security settings
+        hashKnownHosts = true;
+
         sendEnv = [ "LANG" "LC_*" ];
         extraOptions = {
           # Legacy MAC support (only if needed for old servers)

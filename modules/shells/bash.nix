@@ -1,11 +1,8 @@
 { config, pkgs, lib, ... }:
-let
-  aliases = import ./aliases.nix { inherit config pkgs lib; };
-in
 {
   programs.bash = {
     enable = true;
-    shellAliases = aliases.shellAliases;
+    # shellAliases are configured in aliases.nix
 
     bashrcExtra = ''
       # Source Nix
@@ -31,10 +28,10 @@ in
       # FZF configuration
       export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
 
-      # Source stdlib.sh if available
-      if [ -f "$HOME/dotfiles/stdlib.sh/stdlib.sh" ]; then
-        source "$HOME/dotfiles/stdlib.sh/stdlib.sh"
-      fi
+      # stdlib.sh disabled - was causing grep errors
+      # if [ -f "$HOME/dotfiles/stdlib.sh/stdlib.sh" ]; then
+      #   source "$HOME/dotfiles/stdlib.sh/stdlib.sh"
+      # fi
 
       # Initialize carapace completion
       if command -v carapace >/dev/null 2>&1; then

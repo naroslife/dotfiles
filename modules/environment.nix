@@ -1,7 +1,4 @@
 { config, pkgs, lib, ... }:
-let
-  homeDir = config.home.homeDirectory;
-in
 {
   # Session environment variables
   home.sessionVariables = {
@@ -23,26 +20,26 @@ in
       else "firefox";
 
     # === XDG Base Directory Specification ===
-    XDG_CONFIG_HOME = "${homeDir}/.config";
-    XDG_DATA_HOME = "${homeDir}/.local/share";
-    XDG_STATE_HOME = "${homeDir}/.local/state";
-    XDG_CACHE_HOME = "${homeDir}/.cache";
+    XDG_CONFIG_HOME = "${config.home.homeDirectory}/.config";
+    XDG_DATA_HOME = "${config.home.homeDirectory}/.local/share";
+    XDG_STATE_HOME = "${config.home.homeDirectory}/.local/state";
+    XDG_CACHE_HOME = "${config.home.homeDirectory}/.cache";
     XDG_RUNTIME_DIR = "/run/user/$(id -u)";
 
     # === Development Paths ===
-    PROJECTS = "${homeDir}/projects";
-    REPOS = "${homeDir}/repos";
-    DOTFILES = "${homeDir}/dotfiles";
+    PROJECTS = "${config.home.homeDirectory}/projects";
+    REPOS = "${config.home.homeDirectory}/repos";
+    DOTFILES = "${config.home.homeDirectory}/dotfiles";
 
     # === Language-specific ===
     # Go
-    GOPATH = "${homeDir}/go";
-    GOBIN = "${homeDir}/go/bin";
+    GOPATH = "${config.home.homeDirectory}/go";
+    GOBIN = "${config.home.homeDirectory}/go/bin";
     GO111MODULE = "on";
 
     # Rust
-    CARGO_HOME = "${homeDir}/.cargo";
-    RUSTUP_HOME = "${homeDir}/.rustup";
+    CARGO_HOME = "${config.home.homeDirectory}/.cargo";
+    RUSTUP_HOME = "${config.home.homeDirectory}/.rustup";
     RUST_BACKTRACE = "1";
 
     # Python
@@ -53,12 +50,12 @@ in
     VIRTUAL_ENV_DISABLE_PROMPT = "1";
 
     # Node.js
-    NPM_CONFIG_PREFIX = "${homeDir}/.npm-global";
+    NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
     NODE_ENV = "development";
 
     # Ruby
-    GEM_HOME = "${homeDir}/.gem";
-    BUNDLE_USER_HOME = "${homeDir}/.bundle";
+    GEM_HOME = "${config.home.homeDirectory}/.gem";
+    BUNDLE_USER_HOME = "${config.home.homeDirectory}/.bundle";
 
     # Java
     JAVA_HOME = "${pkgs.jdk17}/lib/openjdk";
@@ -77,8 +74,8 @@ in
 
     # === Less configuration ===
     LESS = "-FRXi";
-    LESSHISTFILE = "${homeDir}/.cache/less/history";
-    LESSKEY = "${homeDir}/.config/less/lesskey";
+    LESSHISTFILE = "${config.home.homeDirectory}/.cache/less/history";
+    LESSKEY = "${config.home.homeDirectory}/.config/less/lesskey";
     LESSCHARSET = "utf-8";
 
     # Color in less for man pages
@@ -120,7 +117,7 @@ in
     FZF_ALT_C_OPTS = "--preview 'tree -C {} | head -200'";
 
     # === Ripgrep configuration ===
-    RIPGREP_CONFIG_PATH = "${homeDir}/.config/ripgrep/config";
+    RIPGREP_CONFIG_PATH = "${config.home.homeDirectory}/.config/ripgrep/config";
 
     # === Docker ===
     DOCKER_BUILDKIT = "1";
@@ -128,9 +125,9 @@ in
     COMPOSE_DOCKER_CLI_BUILD = "1";
 
     # === Locale ===
-    LANG = "en_US.UTF-8";
-    LC_ALL = "en_US.UTF-8";
-    LC_CTYPE = "en_US.UTF-8";
+    LANG = "C.UTF-8";
+    LC_ALL = "C.UTF-8";
+    LC_CTYPE = "C.UTF-8";
 
     # === Nix ===
     NIX_SHELL_PRESERVE_PROMPT = "1";
@@ -140,8 +137,8 @@ in
     MAKEFLAGS = "-j$(nproc)";
 
     # === Security ===
-    GNUPGHOME = "${homeDir}/.gnupg";
-    PASSWORD_STORE_DIR = "${homeDir}/.password-store";
+    GNUPGHOME = "${config.home.homeDirectory}/.gnupg";
+    PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.password-store";
 
     # === Application-specific ===
     BAT_THEME = "Monokai Extended";
@@ -151,13 +148,13 @@ in
     EZA_COLORS = "uu=33:gu=33:sn=32:sb=32:da=34:ur=33:uw=31:ux=32:ue=32:gr=33:gw=31:gx=32:tr=33:tw=31:tx=32";
 
     # Zoxide
-    _ZO_DATA_DIR = "${homeDir}/.local/share/zoxide";
+    _ZO_DATA_DIR = "${config.home.homeDirectory}/.local/share/zoxide";
     _ZO_ECHO = "1";
     _ZO_RESOLVE_SYMLINKS = "1";
 
     # Starship
-    STARSHIP_CONFIG = "${homeDir}/.config/starship.toml";
-    STARSHIP_CACHE = "${homeDir}/.cache/starship";
+    STARSHIP_CONFIG = "${config.home.homeDirectory}/.config/starship.toml";
+    STARSHIP_CACHE = "${config.home.homeDirectory}/.cache/starship";
 
     # Man pages
     MANWIDTH = "120";
@@ -170,27 +167,27 @@ in
 
   # Session path
   home.sessionPath = [
-    "${homeDir}/bin"
-    "${homeDir}/.local/bin"
-    "${homeDir}/go/bin"
-    "${homeDir}/.cargo/bin"
-    "${homeDir}/.npm-global/bin"
-    "${homeDir}/.gem/bin"
-    "${homeDir}/.dotnet/tools"
+    "${config.home.homeDirectory}/bin"
+    "${config.home.homeDirectory}/.local/bin"
+    "${config.home.homeDirectory}/go/bin"
+    "${config.home.homeDirectory}/.cargo/bin"
+    "${config.home.homeDirectory}/.npm-global/bin"
+    "${config.home.homeDirectory}/.gem/bin"
+    "${config.home.homeDirectory}/.dotnet/tools"
     "${pkgs.poetry}/bin"
     "\${PATH}"
   ];
 
   # Create necessary directories
   home.activation.createEnvDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    mkdir -p ${homeDir}/.cache/less
-    mkdir -p ${homeDir}/.config/ripgrep
-    mkdir -p ${homeDir}/.local/share/zoxide
-    mkdir -p ${homeDir}/.cache/starship
-    mkdir -p ${homeDir}/projects
-    mkdir -p ${homeDir}/repos
-    mkdir -p ${homeDir}/go/bin
-    mkdir -p ${homeDir}/.npm-global
+    mkdir -p ${config.home.homeDirectory}/.cache/less
+    mkdir -p ${config.home.homeDirectory}/.config/ripgrep
+    mkdir -p ${config.home.homeDirectory}/.local/share/zoxide
+    mkdir -p ${config.home.homeDirectory}/.cache/starship
+    mkdir -p ${config.home.homeDirectory}/projects
+    mkdir -p ${config.home.homeDirectory}/repos
+    mkdir -p ${config.home.homeDirectory}/go/bin
+    mkdir -p ${config.home.homeDirectory}/.npm-global
   '';
 
   # Ripgrep config file

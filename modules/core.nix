@@ -18,7 +18,7 @@
     gzip
     unzip
     zip
-    tar
+    gnutar
     xz
     p7zip
 
@@ -34,7 +34,7 @@
     nano
 
     # === System Monitoring ===
-    htop
+    # htop removed - using htop-vim from modern.nix instead
     lsof
     strace
 
@@ -53,7 +53,9 @@
     # === Fonts ===
     fira-code
     fira-code-symbols
-    nerdfonts
+    # Individual nerd fonts (nerdfonts package deprecated)
+    nerd-fonts.fira-code
+    nerd-fonts.jetbrains-mono
 
     # === Nix Tools ===
     nix-tree

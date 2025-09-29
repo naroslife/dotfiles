@@ -132,7 +132,7 @@ fi
 
 # Use the new flake configuration
 print_color "$GREEN" "Building and activating configuration..."
-if nix run home-manager/master -- switch --impure --flake ".#$USERNAME"; then
+if nix run home-manager/master -- switch --impure --flake ".#$USERNAME" -b backup; then
     print_color "$GREEN" "✅ Configuration applied successfully!"
 else
     print_color "$RED" "❌ Configuration failed. Please check the error messages above."

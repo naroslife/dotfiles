@@ -13,7 +13,7 @@
     helix        # Post-modern modal editor
 
     # Documentation
-    tldr         # Simplified man pages
+    # tldr removed - using tealdeer instead (avoids zsh completion conflict)
     cheat        # Interactive cheatsheets
 
     # Code Analysis

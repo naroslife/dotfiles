@@ -1,8 +1,7 @@
 { config, pkgs, lib, ... }:
-{
+let
   # Common shell aliases shared across bash and zsh
-
-  shellAliases = {
+  commonAliases = {
     # Home Manager
     hm = "nix run home-manager/master -- switch --flake . --impure";
 
@@ -99,4 +98,9 @@
     apt-check = "apt-status";
     apt-public = "echo 'Forcing public repos...' && sudo mkdir -p /etc/apt/sources.list.d/disabled && sudo mv /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/disabled/ 2>/dev/null; echo 'deb http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse\ndeb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse' | sudo tee /etc/apt/sources.list > /dev/null && sudo apt update";
   };
+in
+{
+  # Apply aliases to both bash and zsh
+  programs.bash.shellAliases = commonAliases;
+  programs.zsh.shellAliases = commonAliases;
 }

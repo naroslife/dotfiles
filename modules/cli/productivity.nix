@@ -53,10 +53,5 @@
     };
   };
 
-  # Environment variables
-  home.sessionVariables = {
-    EDITOR = "code";
-    XDG_CONFIG_HOME = "$HOME/.config";
-    FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow";
-  };
+  # Environment variables are configured in modules/environment.nix
 }

@@ -82,8 +82,7 @@
 
   # Environment variables for languages
   home.sessionVariables = {
-    # NPM configuration for user-level global installs
-    NPM_CONFIG_PREFIX = "$HOME/.npm-global";
+    # NPM_CONFIG_PREFIX is configured in modules/environment.nix
 
     # Prefer system pkg-config and ensure Ubuntu pc dirs are visible
     PKG_CONFIG = "/usr/bin/pkg-config";

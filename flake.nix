@@ -7,14 +7,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nur.url = "github:nix-community/NUR"; # Nix User Repository: community packages
-    sops-nix.url = "github:Mic92/sops-nix"; # sops-nix: secret management
-    flake-utils.url = "github:numtide/flake-utils"; # Utility functions for flakes
-    nixpkgs-wayland.url = "github:nix-community/nixpkgs-wayland"; # Wayland packages
-    nixpkgs-python.url = "github:nix-community/nixpkgs-python"; # Latest Python overlays
+    nur.url = "github:nix-community/NUR";
+    sops-nix.url = "github:Mic92/sops-nix";
+    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs-wayland.url = "github:nix-community/nixpkgs-wayland";
   };
 
-  outputs = { self, nixpkgs, home-manager, nur, flake-utils, nixpkgs-wayland, nixpkgs-python, ... }:
+  outputs = { self, nixpkgs, home-manager, nur, flake-utils, nixpkgs-wayland, ... }:
     let
       system = builtins.currentSystem or "x86_64-linux";
       pkgs = import nixpkgs {
@@ -22,34 +21,25 @@
         overlays = [
           nur.overlay
           nixpkgs-wayland.overlay
-          nixpkgs-python.overlay
         ];
-            };
+      };
 
-      # Automatically add current user to supported users
-      currentUser = builtins.getEnv "USER";
-      baseUsers = [ "naroslife" ];
-      users = if currentUser != "" && !(builtins.elem currentUser baseUsers)
-        then baseUsers ++ [ currentUser ]
-        else baseUsers;
+      # List all supported users here
+      users = [ "naroslife" "uif58593" ]; # Add more usernames as needed
 
-      # Helper to generate home configs for each user
       mkHomeConfig = username: home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
           ./home.nix
-          nur.hmModules.nur
-          # sops-nix.homeManagerModules.sops
-          nixpkgs-wayland.homeManagerModules.default
-          # Add more modules as needed
+          nur.modules.homeManager.default
         ];
-        # Optionally pass username/homeDirectory if needed
-        # username = username;
-        # homeDirectory = "/home/${username}";
         extraSpecialArgs = {
           nurPackages = nur.packages.${system};
           waylandPackages = nixpkgs-wayland.packages.${system};
-          pythonPackages = nixpkgs-python.packages.${system};
+          username = username;
+          homeDirectory = "/home/${username}";
+          gitUserName = username;
+          gitUserEmail = (if username == "naroslife" then "robi54321@gmail.com" else "robert.4.nagy@aumovio.com");
         };
       };
     in
@@ -58,12 +48,9 @@
         map (u: { name = u; value = mkHomeConfig u; }) users
       );
 
-      # Example: expose some useful packages from NUR, Wayland, overlays
       packages.${system} = {
         nur-example = nur.packages.${system}.dog;
         wayland-example = nixpkgs-wayland.packages.${system}.wl-clipboard;
-        python-example = nixpkgs-python.packages.${system}.python311;
-        node-example = nixpkgs-node.packages.${system}.nodejs_20;
       };
     };
 }

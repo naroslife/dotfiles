@@ -1,4 +1,5 @@
 {
     "editor.fontFamily": "MesloLGS NF",
-    "terminal.integrated.fontFamily": "MesloLGS NF"
+    "terminal.integrated.fontFamily": "MesloLGS NF",
+    "evo.excecutable": "./evo.sh"
 }

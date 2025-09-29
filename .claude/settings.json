@@ -1,15 +1,29 @@
-{
+g{
   "permissions": {
     "allow": [
       "WebFetch",
       "Bash"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "/",
+      "/nix",
+      "/home",
+      "/var",
+      "/usr",
+      "/proc",
+      "/opt",
+      "/bin",
+      "/lib",
+      "/lib32",
+      "/lib64"
+    ]
+    
   },
   "model": "opus",
   "statusLine": {
     "type": "command",
-    "command": "bash /home/naroslife/.claude/statusline-starship.sh"
+    "command": "bash /home/$(whoami)/.claude/statusline-starship.sh"
   },
   "env": {
     "USE_BUILTIN_RIPGREP": "1",

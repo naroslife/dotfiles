@@ -12,11 +12,10 @@
 - Never commit broken code - ensure tests pass before committing
 
 ## Development Practices
-- When debugging services, always check logs first before modifying code
-- Use tmux sessions for managing multiple services during development
-- Always verify service dependencies are running before starting dependent services
+- When debugging, always check logs first before modifying code
 - Read existing code and configuration before making changes
 - Follow existing code style and conventions in each project
+- For repetitive and complex changes consider using the devx-optimizer agent to automate the process or create developer friendly tooling
 
 ## Bash Script Best Practices
 When writing or modifying bash scripts:
@@ -28,9 +27,8 @@ When writing or modifying bash scripts:
 - Always test scripts with `set -e` enabled to catch potential issues early
 
 ## Configuration Management
-- NEVER hardcode values that could be configurable (ports, paths, timeouts, etc.)
+- NEVER hardcode values that could be configurable or command line parameters (ports, paths, timeouts, etc.)
 - Always check for configuration files or environment variables first
-- When showing service status, display both configured values AND actual runtime values
 - Use proper parsers for structured data:
   - YAML: Use `yq` or Python's yaml library
   - JSON: Use `jq` or Python's json library
@@ -46,25 +44,21 @@ When implementing status or monitoring commands:
 - Example: "Config Port: 8080, Actual Port: 8081" if a service is running on a different port
 
 ## Testing
-- Run tests after implementing features or fixing bugs
-- **ALWAYS test configuration changes immediately after applying them**
-- **When modifying service configurations, restart the service and verify it's running with the new settings**
+- Ask the user if they want to run tests themselves after implementing features or fixing bugs. If not, then you test the solution.
 - Create tests for new functionality when possible
 - Verify E2E flows work before marking tasks as complete
-- After configuration deployments, always run a status check to confirm services are using the new configuration
 
 ## Documentation
-- Update documentation when changing functionality
+- Update documentation when changing functionality with the docs-writer agent.
 - Keep README files current with actual implementation
 - Document configuration changes and their purpose
 
 ## Problem Solving
 - When encountering errors, check:
-  1. Service logs
+  1. Logs
   2. Configuration files
-  3. Port availability
-  4. File permissions
-  5. Dependencies
+  3. File permissions
+  4. Dependencies
 
 ## Architecture
 - Understand component responsibilities before making changes

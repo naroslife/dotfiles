@@ -1,176 +1,182 @@
 #!/usr/bin/env bash
+set -e
 
-set -euo pipefail
-
-# Colors for nicer output
-GREEN='\033[0;32m'
+# Colors for output
 RED='\033[0;31m'
+GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Function to check if we're running in WSL
-is_wsl() {
-    grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null
+# Function to print colored output
+print_color() {
+    local color=$1
+    shift
+    echo -e "${color}$*${NC}"
 }
 
-# Check for required commands
-for cmd in git nix; do
-    if ! command -v $cmd &> /dev/null; then
-        echo -e "${RED}❌ Required command '$cmd' not found. Please install it first.${NC}"
-        exit 1
-    fi
-done
+# Function to print step headers
+print_step() {
+    echo
+    print_color "$BLUE" "══════════════════════════════════════════════════"
+    print_color "$BLUE" "  $1"
+    print_color "$BLUE" "══════════════════════════════════════════════════"
+    echo
+}
 
-# Check for required files
-for file in "flake.nix" "flake.lock" "home.nix"; do
-    if [[ ! -f "$file" ]]; then
-        echo -e "${RED}❌ Required file '$file' not found in $(pwd). Please ensure your repo is complete.${NC}"
-        exit 1
-    fi
-done
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
 
-echo -e "${CYAN}🏠 Applying Home Manager configuration...${NC}"
+# Function to detect WSL
+is_wsl() {
+    [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]
+}
 
-# Check for WSL and show relevant info
-if is_wsl; then
-    echo -e "${YELLOW}🔧 WSL environment detected - applying WSL optimizations${NC}"
-fi
+# Main script
+print_color "$GREEN" "🚀 Dotfiles Setup Script"
+print_color "$GREEN" "========================"
 
-# Check if Nix is installed
-if ! command -v nix &> /dev/null; then
-    echo -e "${RED}❌ Nix is not installed. Installing...${NC}"
-    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-fi
+# Step 1: Check for Nix
+print_step "Checking for Nix installation"
+if ! command_exists nix; then
+    print_color "$YELLOW" "Nix is not installed."
+    read -p "Would you like to install Nix? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        print_color "$GREEN" "Installing Nix..."
+        sh <(curl -L https://nixos.org/nix/install) --daemon
 
-# Check if flakes are enabled
-if ! nix --version | grep -q "flakes"; then
-    echo -e "${YELLOW}📝 Enabling flakes and nix-command...${NC}"
-    mkdir -p ~/.config/nix
-    if ! grep -q "experimental-features = nix-command flakes" ~/.config/nix/nix.conf 2>/dev/null; then
-        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-        sudo systemctl restart nix-daemon.service
-    fi
-fi
-
-# Shell Script UX: --help and --dry-run
-if [[ "${1:-}" == "--help" ]]; then
-    echo -e "${CYAN}Usage: ./apply.sh [--dry-run]${NC}"
-    echo -e "${CYAN}This script applies your Home Manager configuration using flakes or legacy mode.${NC}"
-    exit 0
-fi
-
-DRY_RUN=0
-if [[ "${1:-}" == "--dry-run" ]]; then
-    DRY_RUN=1
-    echo -e "${YELLOW}Dry run mode: no changes will be made.${NC}"
-fi
-
-# Ask user if they want to use git submodules
-if [[ -f ".gitmodules" ]]; then
-    echo ""
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}📦 Do you want to use git submodules?${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    read -p "👉 Use git submodules? [y/N]: " use_submodules
-    if [[ "$use_submodules" =~ ^[Yy]$ ]]; then
-        echo -e "${GREEN}✅ Initializing git submodules...${NC}"
-        git submodule update --init --recursive
+        # Source Nix
+        if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+            . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+        fi
     else
-        echo -e "${YELLOW}🧹 Uninitializing git submodules...${NC}"
-        git submodule deinit -f --all
-        rm -rf .git/modules/*
-    fi
-fi
-
-# Prompt user for Home Manager type
-echo ""
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${CYAN}🏠 Which Home Manager do you want to use?${NC}"
-echo -e "${CYAN}  [f] Flake-based (recommended, multi-user support) - DEFAULT${NC}"
-echo -e "${CYAN}  [r] Regular (legacy)${NC}"
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-read -p "👉 Please choose [f/r] (default: f): " hm_type
-hm_type=${hm_type:-f}
-
-export NIXPKGS_ALLOW_UNFREE=1
-if [[ "$hm_type" =~ ^[Ff]$ ]]; then
-    echo ""
-    echo -e "${GREEN}✅ You chose: Flake-based Home Manager.${NC}"
-    echo -e "${YELLOW}ℹ️  Building and applying Flake-based Home Manager config...${NC}"
-    if [[ $DRY_RUN -eq 0 ]]; then
-        # Prompt for username (must match one in flake.nix users list)
-        read -p "👉 Enter your username for Home Manager (default: $(whoami)): " hm_user
-        hm_user=${hm_user:-$(whoami)}
-        # print hm_user
-        echo -e "${YELLOW}ℹ️  Using Home Manager user: ${hm_user}${NC}"
-        # Prompt for git user.name and user.email
-        # read -p "👉 Enter your Git user.name (default: $hm_user): " GIT_USER_NAME
-        # GIT_USER_NAME="${GIT_USER_NAME:-$hm_user}"
-        # read -p "👉 Enter your Git user.email: " GIT_USER_EMAIL
-
-        # Pass git info via environment variables for home.nix (optional, if you want to use them)
-        # export GIT_USER_NAME
-        # export GIT_USER_EMAIL
-
-        if nix run home-manager/master -- switch --impure --flake ".#${hm_user}"; then
-            echo -e "${GREEN}✅ Flake-based Home Manager configuration applied!${NC}"
-            # echo -e "${YELLOW}🔄 Reloading your shell to apply changes...${NC}"
-            # exec $SHELL -l
-        else
-            echo -e "${RED}❌ Failed to apply Flake-based Home Manager configuration.${NC}"
-            exit 1
-        fi
-    fi
-elif [[ "$hm_type" =~ ^[Rr]$ ]]; then
-    echo ""
-    echo -e "${GREEN}✅ You chose: Regular Home Manager.${NC}"
-    echo -e "${YELLOW}ℹ️  Setting up Regular Home Manager...${NC}"
-    if ! command -v home-manager &> /dev/null; then
-        nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-        nix-channel --update
-        nix-shell '<home-manager>' -A install
-    fi
-    if [[ $DRY_RUN -eq 0 ]]; then
-        if home-manager switch -f ./home.nix; then
-            echo -e "${GREEN}✅ Regular Home Manager configuration applied!${NC}"
-            # echo -e "${YELLOW}🔄 Reloading your shell to apply changes...${NC}"
-            # exec $SHELL -l
-        else
-            echo -e "${RED}❌ Failed to apply Regular Home Manager configuration.${NC}"
-            exit 1
-        fi
+        print_color "$RED" "Nix is required. Exiting."
+        exit 1
     fi
 else
-    echo ""
-    echo -e "${RED}❌ Invalid choice. Exiting.${NC}"
+    print_color "$GREEN" "✓ Nix is installed"
+fi
+
+# Step 2: Enable flakes and nix-command
+print_step "Checking Nix experimental features"
+if ! nix --version 2>&1 | grep -q "flakes"; then
+    print_color "$YELLOW" "Enabling experimental features..."
+    mkdir -p ~/.config/nix
+    echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+fi
+print_color "$GREEN" "✓ Experimental features enabled"
+
+# Step 3: Check for git
+print_step "Checking for git"
+if ! command_exists git; then
+    print_color "$RED" "Git is not installed. Please install git first."
+    exit 1
+fi
+print_color "$GREEN" "✓ Git is installed"
+
+# Step 4: Initialize/update git submodules if .gitmodules exists
+if [ -f .gitmodules ]; then
+    print_step "Initializing git submodules"
+    git submodule update --init --recursive
+    print_color "$GREEN" "✓ Git submodules initialized"
+fi
+
+# Step 5: Detect username
+print_step "Detecting user configuration"
+CURRENT_USER=$(whoami)
+print_color "$BLUE" "Current user: $CURRENT_USER"
+
+# Check if user has a configuration
+if grep -q "\"$CURRENT_USER\"" flake.nix 2>/dev/null; then
+    print_color "$GREEN" "✓ Configuration found for $CURRENT_USER"
+    USERNAME=$CURRENT_USER
+else
+    print_color "$YELLOW" "No configuration found for $CURRENT_USER"
+    print_color "$YELLOW" "Available configurations: naroslife, uif58593"
+    read -p "Enter username to use: " USERNAME
+
+    if ! grep -q "\"$USERNAME\"" flake.nix 2>/dev/null; then
+        print_color "$RED" "Invalid username. Exiting."
+        exit 1
+    fi
+fi
+
+# Step 6: Backup old configuration if it exists
+if [ -f home.nix ] && [ ! -f home.nix.backup ]; then
+    print_step "Backing up old configuration"
+    cp home.nix home.nix.backup
+    print_color "$GREEN" "✓ Old configuration backed up to home.nix.backup"
+fi
+
+# Step 7: Apply the configuration
+print_step "Applying Home Manager configuration"
+print_color "$YELLOW" "This will:"
+print_color "$YELLOW" "  • Install all packages defined in modules/"
+print_color "$YELLOW" "  • Configure shells (bash, zsh, elvish)"
+print_color "$YELLOW" "  • Set up development tools"
+print_color "$YELLOW" "  • Configure modern CLI tools"
+if is_wsl; then
+    print_color "$YELLOW" "  • Apply WSL-specific optimizations"
+fi
+
+read -p "Continue? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    print_color "$RED" "Aborted."
     exit 1
 fi
 
-echo ""
-echo -e "${CYAN}💡 If you need to push to private repos, you may need to unset your GitHub token.${NC}"
-read -p "👉 Do you want to unset GITHUB_TOKEN and run 'gh auth login' now? [y/N]: " unset_gh_token
-if [[ "$unset_gh_token" =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}🔑 Unsetting GITHUB_TOKEN and starting GitHub CLI authentication...${NC}"
-    unset GITHUB_TOKEN
-    gh auth login
+# Use the new flake configuration
+print_color "$GREEN" "Building and activating configuration..."
+if nix run home-manager/master -- switch --impure --flake ".#$USERNAME"; then
+    print_color "$GREEN" "✅ Configuration applied successfully!"
+else
+    print_color "$RED" "❌ Configuration failed. Please check the error messages above."
+    exit 1
 fi
 
-# Show info about submodules
-if [[ -d "base" ]] && [[ -f "base/base.sh" ]]; then
-    echo -e "${CYAN}📚 Base shell framework will be automatically sourced${NC}"
+# Step 8: WSL-specific setup
+if is_wsl; then
+    print_step "WSL-specific setup"
+
+    # Check APT network configuration
+    if [ -x "$HOME/.nix-profile/bin/apt-network-switch" ]; then
+        print_color "$YELLOW" "Checking APT network configuration..."
+        "$HOME/.nix-profile/bin/apt-network-switch" --quiet || true
+    fi
+
+    print_color "$GREEN" "✓ WSL setup complete"
 fi
 
-if [[ -d "stdlib.sh" ]] && [[ -f "stdlib.sh/stdlib.sh" ]]; then
-    echo -e "${CYAN}🔧 Stdlib.sh will be automatically sourced${NC}"
+# Step 9: Post-installation tasks
+print_step "Post-installation tasks"
+
+# Configure GitHub CLI if installed
+if command_exists gh; then
+    read -p "Would you like to authenticate GitHub CLI? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        gh auth login
+    fi
 fi
 
-# Show summary
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${CYAN}Summary:${NC}"
-echo -e "${CYAN}• Home Manager type: $hm_type${NC}"
-if [[ -f ".gitmodules" ]]; then
-    echo -e "${CYAN}• Git submodules: $( [[ "$use_submodules" =~ ^[Yy]$ ]] && echo "enabled" || echo "disabled" )${NC}"
-fi
-echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+# Final instructions
+print_step "Setup Complete! 🎉"
+print_color "$GREEN" "Your dotfiles have been successfully installed!"
+print_color "$YELLOW" ""
+print_color "$YELLOW" "Next steps:"
+print_color "$YELLOW" "  1. Restart your shell or run: source ~/.bashrc"
+print_color "$YELLOW" "  2. Try some modern CLI tools:"
+print_color "$YELLOW" "     • 'eza' instead of 'ls'"
+print_color "$YELLOW" "     • 'bat' instead of 'cat'"
+print_color "$YELLOW" "     • 'fd' instead of 'find'"
+print_color "$YELLOW" "     • 'rg' instead of 'grep'"
+print_color "$YELLOW" ""
+print_color "$YELLOW" "To update your configuration:"
+print_color "$YELLOW" "  • Edit files in modules/"
+print_color "$YELLOW" "  • Run: ./apply.sh"
+print_color "$YELLOW" ""
+print_color "$YELLOW" "For more information, see README.md"

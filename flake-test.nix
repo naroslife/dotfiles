@@ -51,7 +51,7 @@
           inherit pkgs;
 
           modules = [
-            ./home.nix
+            ./home-new.nix
             {
               # User-specific configuration
               home = {

@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 {
   home.packages = with pkgs; [
-    elvish       # Friendly interactive shell with structured data pipelines
+    elvish # Friendly interactive shell with structured data pipelines
   ];
 
   # Elvish configuration files are managed through home.file in core.nix

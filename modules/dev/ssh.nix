@@ -2,7 +2,7 @@
 {
   programs.ssh = {
     enable = true;
-    enableDefaultConfig = false;  # Suppress default config warnings
+    enableDefaultConfig = false; # Suppress default config warnings
 
     # Global match blocks
     matchBlocks = {
@@ -122,10 +122,10 @@
 
   # SSH-related packages
   home.packages = with pkgs; [
-    sshfs        # Mount remote filesystems over SSH
-    ssh-copy-id  # Copy SSH keys to remote hosts
-    mosh         # Mobile shell (better for unreliable connections)
-    autossh      # Automatically restart SSH sessions
+    sshfs # Mount remote filesystems over SSH
+    ssh-copy-id # Copy SSH keys to remote hosts
+    mosh # Mobile shell (better for unreliable connections)
+    autossh # Automatically restart SSH sessions
   ];
 
   # Create SSH directory with correct permissions

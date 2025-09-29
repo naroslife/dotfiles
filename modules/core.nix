@@ -61,6 +61,6 @@
     nix-tree
     nix-diff
     nixpkgs-fmt
-    nil  # Nix language server
+    nil # Nix language server
   ];
 }

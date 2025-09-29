@@ -4,18 +4,18 @@
     # === Version Control & Git Tools ===
     git
     git-lfs
-    lazygit      # Terminal UI for git commands
-    delta        # Syntax-highlighting pager for git diffs
-    difftastic   # Structural diff that understands syntax trees
-    gitui        # Blazing fast terminal-ui for git
-    gh           # GitHub CLI for managing PRs, issues, etc.
-    git-absorb   # Automatically absorb staged changes into your recent commits
+    lazygit # Terminal UI for git commands
+    delta # Syntax-highlighting pager for git diffs
+    difftastic # Structural diff that understands syntax trees
+    gitui # Blazing fast terminal-ui for git
+    gh # GitHub CLI for managing PRs, issues, etc.
+    git-absorb # Automatically absorb staged changes into your recent commits
 
     # Additional useful git tools
-    git-crypt    # Transparent file encryption in git
-    git-filter-repo  # Quickly rewrite git repository history
-    gitleaks     # Detect secrets in git repos
-    pre-commit   # Framework for managing git hooks
+    git-crypt # Transparent file encryption in git
+    git-filter-repo # Quickly rewrite git repository history
+    gitleaks # Detect secrets in git repos
+    pre-commit # Framework for managing git hooks
   ];
 
   programs.git = {
@@ -127,10 +127,10 @@
     extraConfig = {
       core = {
         editor = "nvim";
-        autocrlf = "input";  # WSL: Handle line endings properly
-        safecrlf = true;     # WSL: Warn about mixed line endings
+        autocrlf = "input"; # WSL: Handle line endings properly
+        safecrlf = true; # WSL: Warn about mixed line endings
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
-        filemode = false;    # Better handling of file permissions
+        filemode = false; # Better handling of file permissions
       };
 
       init = {

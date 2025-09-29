@@ -44,36 +44,36 @@
     # Readline variables
     variables = {
       # Basic behavior
-      bell-style = "none";  # No bell
-      colored-stats = true;  # Color files by type in completions
-      colored-completion-prefix = true;  # Color the common prefix
-      completion-ignore-case = true;  # Case-insensitive completion
-      completion-map-case = true;  # Treat - and _ as equivalent
-      expand-tilde = true;  # Expand ~ to home directory
-      mark-directories = true;  # Append / to directory names
-      mark-symlinked-directories = true;  # Append / to symlinked directories
-      show-all-if-ambiguous = true;  # Show all completions immediately
-      show-all-if-unmodified = true;  # Show all completions if no partial completion
-      visible-stats = true;  # Show file type indicators
+      bell-style = "none"; # No bell
+      colored-stats = true; # Color files by type in completions
+      colored-completion-prefix = true; # Color the common prefix
+      completion-ignore-case = true; # Case-insensitive completion
+      completion-map-case = true; # Treat - and _ as equivalent
+      expand-tilde = true; # Expand ~ to home directory
+      mark-directories = true; # Append / to directory names
+      mark-symlinked-directories = true; # Append / to symlinked directories
+      show-all-if-ambiguous = true; # Show all completions immediately
+      show-all-if-unmodified = true; # Show all completions if no partial completion
+      visible-stats = true; # Show file type indicators
 
       # History
-      history-preserve-point = true;  # Preserve cursor position in history
-      history-size = 10000;  # Maximum history entries
-      revert-all-at-newline = true;  # Revert history edits on new line
+      history-preserve-point = true; # Preserve cursor position in history
+      history-size = 10000; # Maximum history entries
+      revert-all-at-newline = true; # Revert history edits on new line
 
       # Completion behavior
-      menu-complete-display-prefix = true;  # Show common prefix when menu completing
-      skip-completed-text = true;  # Insert only missing text
-      completion-query-items = 200;  # Ask before showing >200 completions
+      menu-complete-display-prefix = true; # Show common prefix when menu completing
+      skip-completed-text = true; # Insert only missing text
+      completion-query-items = 200; # Ask before showing >200 completions
 
       # Input
-      enable-keypad = true;  # Enable keypad
-      input-meta = true;  # Enable 8-bit input
-      output-meta = true;  # Enable 8-bit output
-      convert-meta = false;  # Don't strip 8th bit
+      enable-keypad = true; # Enable keypad
+      input-meta = true; # Enable 8-bit input
+      output-meta = true; # Enable 8-bit output
+      convert-meta = false; # Don't strip 8th bit
 
       # Editing
-      enable-bracketed-paste = true;  # Better paste handling
+      enable-bracketed-paste = true; # Better paste handling
 
       # Vi mode settings (if you prefer vi mode)
       # editing-mode = "vi";

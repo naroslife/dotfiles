@@ -10,20 +10,20 @@
 
   home.packages = with pkgs; [
     # Text Editors
-    helix        # Post-modern modal editor
+    helix # Post-modern modal editor
 
     # Documentation
     # tldr removed - using tealdeer instead (avoids zsh completion conflict)
-    cheat        # Interactive cheatsheets
+    cheat # Interactive cheatsheets
 
     # Code Analysis
-    tokei        # Code statistics
-    cloc         # Count lines of code
-    scc          # Fast code counter
+    tokei # Code statistics
+    cloc # Count lines of code
+    scc # Fast code counter
 
     # Debugging
-    gdb          # GNU debugger
-    lldb         # LLVM debugger
+    gdb # GNU debugger
+    lldb # LLVM debugger
   ];
 
   programs.neovim = {

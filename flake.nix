@@ -73,11 +73,12 @@
           };
         };
       };
-    in {
+    in
+    {
       # Generate home configurations for all users
       homeConfigurations = builtins.foldl'
         (acc: username: acc // mkHomeConfig username users.${username})
-        {}
+        { }
         (builtins.attrNames users);
 
       # Convenience aliases for common operations
@@ -108,7 +109,6 @@
       # Development shell
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = with pkgs; [
-          home-manager
           git
           nixpkgs-fmt
           nil
@@ -126,15 +126,16 @@
       # Flake checks
       checks.${system} = {
         # Check nix formatting
-        format = pkgs.runCommand "check-format" {
-          buildInputs = [ pkgs.nixpkgs-fmt ];
-        } ''
+        format = pkgs.runCommand "check-format"
+          {
+            buildInputs = [ pkgs.nixpkgs-fmt ];
+          } ''
           ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt --check ${./.}
           touch $out
         '';
 
         # Validate all home configurations build
-        build-all = pkgs.runCommand "build-all-configs" {} ''
+        build-all = pkgs.runCommand "build-all-configs" { } ''
           ${pkgs.lib.concatStringsSep "\n" (map (user: ''
             echo "Building configuration for ${user}..."
           '') (builtins.attrNames users))}

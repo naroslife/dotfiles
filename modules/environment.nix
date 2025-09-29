@@ -15,7 +15,8 @@
     COLORTERM = "truecolor";
 
     # === Browser ===
-    BROWSER = if (builtins.pathExists /proc/sys/fs/binfmt_misc/WSLInterop)
+    BROWSER =
+      if (builtins.pathExists /proc/sys/fs/binfmt_misc/WSLInterop)
       then "wslview"
       else "firefox";
 
@@ -79,13 +80,13 @@
     LESSCHARSET = "utf-8";
 
     # Color in less for man pages
-    LESS_TERMCAP_mb = "$(tput bold; tput setaf 2)";  # begin blinking
-    LESS_TERMCAP_md = "$(tput bold; tput setaf 6)";  # begin bold
-    LESS_TERMCAP_me = "$(tput sgr0)";                # end mode
-    LESS_TERMCAP_so = "$(tput bold; tput setaf 3; tput setab 4)";  # begin standout
-    LESS_TERMCAP_se = "$(tput rmso; tput sgr0)";     # end standout
-    LESS_TERMCAP_us = "$(tput smul; tput bold; tput setaf 7)";  # begin underline
-    LESS_TERMCAP_ue = "$(tput rmul; tput sgr0)";     # end underline
+    LESS_TERMCAP_mb = "$(tput bold; tput setaf 2)"; # begin blinking
+    LESS_TERMCAP_md = "$(tput bold; tput setaf 6)"; # begin bold
+    LESS_TERMCAP_me = "$(tput sgr0)"; # end mode
+    LESS_TERMCAP_so = "$(tput bold; tput setaf 3; tput setab 4)"; # begin standout
+    LESS_TERMCAP_se = "$(tput rmso; tput sgr0)"; # end standout
+    LESS_TERMCAP_us = "$(tput smul; tput bold; tput setaf 7)"; # begin underline
+    LESS_TERMCAP_ue = "$(tput rmul; tput sgr0)"; # end underline
     LESS_TERMCAP_mr = "$(tput rev)";
     LESS_TERMCAP_mh = "$(tput dim)";
     LESS_TERMCAP_ZN = "$(tput ssubm)";
@@ -179,7 +180,7 @@
   ];
 
   # Create necessary directories
-  home.activation.createEnvDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.createEnvDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     mkdir -p ${config.home.homeDirectory}/.cache/less
     mkdir -p ${config.home.homeDirectory}/.config/ripgrep
     mkdir -p ${config.home.homeDirectory}/.local/share/zoxide

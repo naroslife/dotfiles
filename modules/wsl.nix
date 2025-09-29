@@ -2,7 +2,7 @@
 {
   home.packages = with pkgs; [
     # === WSL Specific ===
-    wslu         # Windows Subsystem for Linux utilities (wslview, wslpath, etc.)
+    wslu # Windows Subsystem for Linux utilities (wslview, wslpath, etc.)
     # vcxsrv       # X server for Windows (enables GUI apps in WSL)
 
     # APT network switching scripts for WSL with Continental repos

@@ -19,7 +19,7 @@
 
     # Shell enhancements
     # thefuck removed - incompatible with python 3.12+
-    mcfly      # Smart command history
+    mcfly # Smart command history
   ];
 
   programs.starship = {
@@ -127,8 +127,8 @@
       enter_accept = false;
 
       # Stats settings
-      common_prefix = ["sudo"];
-      common_subcommands = ["docker" "git" "npm" "cargo"];
+      common_prefix = [ "sudo" ];
+      common_subcommands = [ "docker" "git" "npm" "cargo" ];
 
       # Sync settings
       key_path = "~/.local/share/atuin/key";
@@ -159,7 +159,7 @@
   };
 
   programs.mcfly = {
-    enable = false;  # Disabled by default in favor of atuin
+    enable = false; # Disabled by default in favor of atuin
     enableBashIntegration = false;
     enableZshIntegration = false;
   };

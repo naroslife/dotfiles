@@ -15,41 +15,7 @@ in
   # Let home-manager manage itself
   programs.home-manager.enable = true;
 
-  # Basic session variables
-  home.sessionVariables = {
-    EDITOR = "nvim";
-    VISUAL = "nvim";
-    PAGER = "less";
-    TERMINAL = "alacritty";
-
-    # Development
-    GOPATH = "${homeDir}/go";
-    CARGO_HOME = "${homeDir}/.cargo";
-    RUSTUP_HOME = "${homeDir}/.rustup";
-
-    # XDG Base Directory Specification
-    XDG_CONFIG_HOME = "${homeDir}/.config";
-    XDG_DATA_HOME = "${homeDir}/.local/share";
-    XDG_STATE_HOME = "${homeDir}/.local/state";
-    XDG_CACHE_HOME = "${homeDir}/.cache";
-
-    # PATH additions
-    PATH = lib.concatStringsSep ":" [
-      "${homeDir}/bin"
-      "${homeDir}/.local/bin"
-      "${homeDir}/go/bin"
-      "${homeDir}/.cargo/bin"
-      "\${PATH}"
-    ];
-  };
-
-  # Session path
-  home.sessionPath = [
-    "${homeDir}/bin"
-    "${homeDir}/.local/bin"
-    "${homeDir}/go/bin"
-    "${homeDir}/.cargo/bin"
-  ];
+  # Session variables and paths are now managed in modules/environment.nix
 
   # File management
   home.file = {
@@ -67,14 +33,14 @@ in
     # Note: starship, tmux, and atuin configurations are now managed
     # via Nix modules in modules/shells/default.nix and modules/dev/default.nix
 
-    # SSH configuration
-    ".ssh/config" = {
-      source = ./ssh/config;
-      onChange = "chmod 600 ~/.ssh/config";
-    };
+    # SSH configuration is now managed in modules/dev/ssh.nix
 
     # Tool versions for asdf
     ".tool-versions".source = ./.tool-versions;
+
+    # Git and VS Code configurations are managed in:
+    # - modules/dev/git.nix
+    # - modules/dev/vscode.nix
   };
 
   # XDG configuration

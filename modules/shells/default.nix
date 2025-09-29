@@ -5,6 +5,7 @@
     ./zsh.nix
     ./elvish.nix
     ./aliases.nix
+    ./readline.nix
   ];
 
   home.packages = with pkgs; [

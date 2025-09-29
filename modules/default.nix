@@ -2,6 +2,7 @@
 {
   imports = [
     ./core.nix
+    ./environment.nix
     ./shells
     ./dev
     ./cli

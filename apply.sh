@@ -67,27 +67,57 @@ if [[ "${1:-}" == "--dry-run" ]]; then
     echo -e "${YELLOW}Dry run mode: no changes will be made.${NC}"
 fi
 
+# Ask user if they want to use git submodules
+if [[ -f ".gitmodules" ]]; then
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}📦 Do you want to use git submodules?${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    read -p "👉 Use git submodules? [y/N]: " use_submodules
+    if [[ "$use_submodules" =~ ^[Yy]$ ]]; then
+        echo -e "${GREEN}✅ Initializing git submodules...${NC}"
+        git submodule update --init --recursive
+    else
+        echo -e "${YELLOW}🧹 Uninitializing git submodules...${NC}"
+        git submodule deinit -f --all
+        rm -rf .git/modules/*
+    fi
+fi
+
 # Prompt user for Home Manager type
 echo ""
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${CYAN}🏠 Which Home Manager do you want to use?${NC}"
-echo -e "${CYAN}  [f] Flake-based (recommended, multi-user support)${NC}"
+echo -e "${CYAN}  [f] Flake-based (recommended, multi-user support) - DEFAULT${NC}"
 echo -e "${CYAN}  [r] Regular (legacy)${NC}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-read -p "👉 Please choose [f/r]: " hm_type
+read -p "👉 Please choose [f/r] (default: f): " hm_type
+hm_type=${hm_type:-f}
 
+export NIXPKGS_ALLOW_UNFREE=1
 if [[ "$hm_type" =~ ^[Ff]$ ]]; then
     echo ""
     echo -e "${GREEN}✅ You chose: Flake-based Home Manager.${NC}"
     echo -e "${YELLOW}ℹ️  Building and applying Flake-based Home Manager config...${NC}"
     if [[ $DRY_RUN -eq 0 ]]; then
-        # Prompt for username
-        read -p "👉 Enter your username for Home Manager (default: $USER): " hm_user
-        hm_user=${hm_user:-$USER}
-        if nix run home-manager/master -- switch --flake .#"${hm_user}"; then
+        # Prompt for username (must match one in flake.nix users list)
+        read -p "👉 Enter your username for Home Manager (default: $(whoami)): " hm_user
+        hm_user=${hm_user:-$(whoami)}
+        # print hm_user
+        echo -e "${YELLOW}ℹ️  Using Home Manager user: ${hm_user}${NC}"
+        # Prompt for git user.name and user.email
+        # read -p "👉 Enter your Git user.name (default: $hm_user): " GIT_USER_NAME
+        # GIT_USER_NAME="${GIT_USER_NAME:-$hm_user}"
+        # read -p "👉 Enter your Git user.email: " GIT_USER_EMAIL
+
+        # Pass git info via environment variables for home.nix (optional, if you want to use them)
+        # export GIT_USER_NAME
+        # export GIT_USER_EMAIL
+
+        if nix run home-manager/master -- switch --impure --flake ".#${hm_user}"; then
             echo -e "${GREEN}✅ Flake-based Home Manager configuration applied!${NC}"
-            echo -e "${YELLOW}🔄 Reloading your shell to apply changes...${NC}"
-            exec $SHELL -l
+            # echo -e "${YELLOW}🔄 Reloading your shell to apply changes...${NC}"
+            # exec $SHELL -l
         else
             echo -e "${RED}❌ Failed to apply Flake-based Home Manager configuration.${NC}"
             exit 1
@@ -105,8 +135,8 @@ elif [[ "$hm_type" =~ ^[Rr]$ ]]; then
     if [[ $DRY_RUN -eq 0 ]]; then
         if home-manager switch -f ./home.nix; then
             echo -e "${GREEN}✅ Regular Home Manager configuration applied!${NC}"
-            echo -e "${YELLOW}🔄 Reloading your shell to apply changes...${NC}"
-            exec $SHELL -l
+            # echo -e "${YELLOW}🔄 Reloading your shell to apply changes...${NC}"
+            # exec $SHELL -l
         else
             echo -e "${RED}❌ Failed to apply Regular Home Manager configuration.${NC}"
             exit 1
@@ -116,23 +146,6 @@ else
     echo ""
     echo -e "${RED}❌ Invalid choice. Exiting.${NC}"
     exit 1
-fi
-
-# Ask user if they want to use git submodules
-if [[ -f ".gitmodules" ]]; then
-    echo ""
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}📦 Do you want to use git submodules?${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    read -p "👉 Use git submodules? [y/N]: " use_submodules
-    if [[ "$use_submodules" =~ ^[Yy]$ ]]; then
-        echo -e "${GREEN}✅ Initializing git submodules...${NC}"
-        git submodule update --init --recursive
-    else
-        echo -e "${YELLOW}🧹 Uninitializing git submodules...${NC}"
-        git submodule deinit -f --all
-        rm -rf .git/modules/*
-    fi
 fi
 
 echo ""

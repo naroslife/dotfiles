@@ -58,18 +58,14 @@ in
     ".config/elvish/lib".source = ./elvish/lib;
     ".config/elvish/aliases".source = ./elvish/aliases;
 
-    # Starship configuration
-    ".config/starship.toml".source = ./starship/starship.toml;
-
-    # Tmux configuration
-    ".config/tmux/tmux.conf".source = ./tmux/tmux.conf;
+    # Tmux scripts (configuration now in modules/dev/default.nix)
     ".config/tmux/scripts".source = ./tmux/scripts;
-
-    # Atuin configuration
-    ".config/atuin".source = ./atuin;
 
     # Carapace configuration
     ".config/carapace".source = ./carapace;
+
+    # Note: starship, tmux, and atuin configurations are now managed
+    # via Nix modules in modules/shells/default.nix and modules/dev/default.nix
 
     # SSH configuration
     ".ssh/config" = {

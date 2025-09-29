@@ -4,26 +4,88 @@
     ./bash.nix
     ./zsh.nix
     ./elvish.nix
+    ./aliases.nix
   ];
 
   home.packages = with pkgs; [
-    # === Shell & Terminal Environment ===
-    starship     # Fast, customizable prompt for any shell
-    bash-completion
-    zsh-completions
-    carapace     # Multi-shell completion engine that works across bash, zsh, fish, etc.
-    direnv       # Load/unload environment variables based on directory
+    # Shell essentials
+    zsh
+    elvish
 
-    # === Shell History Tools ===
-    atuin        # Magical shell history using SQLite
-    mcfly        # Intelligent command history search using neural networks
+    # Completions
+    zsh-completions
+    carapace
+
+    # Shell enhancements
+    thefuck    # Correct previous commands
+    mcfly      # Smart command history
   ];
 
-  # Tool integrations
   programs.starship = {
     enable = true;
     enableBashIntegration = true;
     enableZshIntegration = true;
+    settings = {
+      command_timeout = 2000;
+      format = ''
+        [░▒▓](#a3aed2)[  ](bg:#a3aed2 fg:#090c0c)[](bg:#769ff0 fg:#a3aed2)$directory[](fg:#769ff0 bg:#394260)$git_branch[](fg:#394260 bg:#212736)$nodejs$rust$golang$php[](fg:#212736 bg:#1d2230)$time[ ](fg:#1d2230)
+        $character'';
+
+      directory = {
+        style = "fg:#e3e5e5 bg:#769ff0";
+        format = "[ $path ]($style)";
+        truncation_length = 3;
+        truncation_symbol = "…/";
+        substitutions = {
+          "Documents" = "󰈙 ";
+          "Downloads" = " ";
+          "Music" = " ";
+          "Pictures" = " ";
+        };
+      };
+
+      git_branch = {
+        symbol = "";
+        style = "bg:#394260";
+        format = "[[ $symbol $branch \\$ ](fg:#769ff0 bg:#394260)]($style)";
+      };
+
+      git_status = {
+        style = "bg:#394260";
+        format = "[[($all_status$ahead_behind )](fg:#769ff0 bg:#394260)]($style)";
+      };
+
+      nodejs = {
+        symbol = "";
+        style = "bg:#212736";
+        format = "[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)";
+      };
+
+      rust = {
+        symbol = "";
+        style = "bg:#212736";
+        format = "[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)";
+      };
+
+      golang = {
+        symbol = "";
+        style = "bg:#212736";
+        format = "[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)";
+      };
+
+      php = {
+        symbol = "";
+        style = "bg:#212736";
+        format = "[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)";
+      };
+
+      time = {
+        disabled = false;
+        time_format = "%R";
+        style = "bg:#1d2230";
+        format = "[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)";
+      };
+    };
   };
 
   programs.zoxide = {
@@ -36,6 +98,45 @@
     enable = true;
     enableBashIntegration = true;
     enableZshIntegration = true;
+    settings = {
+      # General settings
+      auto_sync = true;
+      update_check = false;
+      sync_frequency = "5m";
+      sync_address = "https://api.atuin.sh";
+
+      # Search settings
+      search_mode = "fuzzy";
+      filter_mode = "host";
+      filter_mode_shell_up_key_binding = "session";
+      style = "compact";
+      inline_height = 10;
+      show_preview = true;
+
+      # History settings
+      history_filter = [
+        "^ls"
+        "^cd"
+        "^pwd"
+        "^exit"
+        "^clear"
+      ];
+
+      # Key bindings
+      enter_accept = false;
+
+      # Stats settings
+      common_prefix = ["sudo"];
+      common_subcommands = ["docker" "git" "npm" "cargo"];
+
+      # Sync settings
+      key_path = "~/.local/share/atuin/key";
+      session_path = "~/.local/share/atuin/session";
+
+      # UI settings
+      show_help = true;
+      exit_mode = "return-original";
+    };
   };
 
   programs.fzf = {
@@ -45,9 +146,9 @@
   };
 
   programs.direnv = {
-    enable = false;
-    enableBashIntegration = false;
-    enableZshIntegration = false;
+    enable = true;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
   };
 
   programs.broot = {
@@ -57,10 +158,8 @@
   };
 
   programs.mcfly = {
-    enable = false;
+    enable = false;  # Disabled by default in favor of atuin
     enableBashIntegration = false;
     enableZshIntegration = false;
-    keyScheme = "vim";
-    fuzzySearchFactor = 2;
   };
 }

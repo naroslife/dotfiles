@@ -32,9 +32,9 @@ cd ~/dotfiles
 
 The setup script will:
 1. Install Nix with flakes support (if not already installed)
-2. Initialize git submodules
-3. Detect your username and apply the appropriate configuration
-4. Set up all shells, tools, and configurations
+2. Detect your username and apply the appropriate configuration
+3. Set up all shells, tools, and configurations
+4. Configure locale (using C.UTF-8 for WSL compatibility)
 
 ### Manual Installation
 
@@ -62,31 +62,37 @@ dotfiles/
 ├── modules/           # Modular Nix configurations
 │   ├── default.nix   # Module aggregator
 │   ├── core.nix      # Essential packages and utilities
-│   ├── shells/       # Shell configurations
+│   ├── environment.nix # Environment variables and locale
+│   ├── wsl.nix       # WSL-specific configuration
+│   ├── shells/       # Shell configurations (bash, zsh, aliases)
+│   │   ├── default.nix  # Starship, Atuin, shared tools
 │   │   ├── bash.nix
 │   │   ├── zsh.nix
-│   │   └── elvish.nix
+│   │   └── aliases.nix
 │   ├── dev/          # Development tools
-│   │   ├── git.nix
-│   │   ├── languages.nix
-│   │   └── containers.nix
-│   ├── cli/          # CLI tools
-│   │   ├── modern.nix      # Modern replacements
-│   │   └── productivity.nix
-│   └── wsl.nix       # WSL-specific configuration
+│   │   ├── default.nix    # Tmux, Neovim, editors
+│   │   ├── git.nix        # Git with delta and hooks
+│   │   ├── ssh.nix        # SSH with security hardening
+│   │   ├── vscode.nix     # VS Code with extensions
+│   │   ├── languages.nix  # Programming languages
+│   │   └── containers.nix # Docker, Kubernetes
+│   └── cli/          # CLI tools
+│       ├── default.nix
+│       ├── modern.nix      # Modern replacements (eza, bat, fd, rg)
+│       └── productivity.nix # Productivity tools (fzf, ranger, jq)
 │
-├── scripts/          # Shell scripts and functions
-│   ├── apt-network-switch.sh  # WSL network detection
-│   └── functions/   # Shell function libraries
+├── scripts/          # Shell scripts
+│   └── apt-network-switch.sh  # WSL network detection
 │
-├── config/          # Static configurations
-│   ├── starship/    # Starship prompt
-│   ├── atuin/       # Shell history
-│   └── tmux/        # Terminal multiplexer
+├── wsl-init.sh      # WSL initialization (sources once per shell)
+│
+├── tmux/            # Tmux configuration
+│   └── scripts/     # Tmux helper scripts
 │
 └── elvish/          # Elvish shell configuration
     ├── rc.elv
-    └── lib/
+    ├── lib/
+    └── aliases/
 
 ```
 
@@ -185,6 +191,7 @@ The configuration automatically detects WSL and:
 - Sets up APT repository switching for corporate networks
 - Optimizes performance settings
 - Provides Windows interop commands
+- Shows helpful reminders once per day (not on every shell)
 
 ## Maintenance
 
@@ -232,11 +239,15 @@ home-manager expire-generations "-30 days"
    - Check syntax: `nix flake check`
    - Ensure all imports exist and are valid
 
-3. **WSL-specific issues**
+3. **Locale warnings**
+   - The config uses `C.UTF-8` which is available on all systems
+   - If you need `en_US.UTF-8`, install locale package and update `modules/environment.nix`
+
+4. **WSL-specific issues**
    - Run `./scripts/apt-network-switch.sh` to fix APT repositories
    - Ensure WSL2 is being used (not WSL1)
 
-4. **Permission denied**
+5. **Permission denied**
    - Home Manager doesn't require sudo
    - Ensure you own your home directory
 

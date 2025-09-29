@@ -2,6 +2,7 @@
 {
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;  # Suppress default config warnings
 
     # Global match blocks
     matchBlocks = {

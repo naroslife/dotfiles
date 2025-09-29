@@ -8,23 +8,23 @@
 
     # shellAliases are configured in aliases.nix
 
-    initExtraFirst = ''
-      # Source Nix
-      if [ -e "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh" ]; then
-        source "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh"
-      elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-        source "$HOME/.nix-profile/etc/profile.d/nix.sh"
-      fi
+    initContent = lib.mkMerge [
+      (lib.mkBefore ''
+        # Source Nix
+        if [ -e "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh" ]; then
+          source "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh"
+        elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+          source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+        fi
 
-      # Load Home Manager session variables (needed for non-login interactive shells)
-      if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
-        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
-      fi
+        # Load Home Manager session variables (needed for non-login interactive shells)
+        if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+          . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+        fi
 
-      unset PKG_CONFIG_LIBDIR
-    '';
-
-    initExtra = ''
+        unset PKG_CONFIG_LIBDIR
+      '')
+      ''
       # Key bindings
       bindkey '^w' autosuggest-execute
       bindkey '^e' autosuggest-accept
@@ -82,6 +82,7 @@
       }
 
       set +u
-    '';
+    ''
+    ];
   };
 }

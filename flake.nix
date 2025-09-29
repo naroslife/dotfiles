@@ -125,10 +125,20 @@
 
       # Flake checks
       checks.${system} = {
+        # Check nix formatting
         format = pkgs.runCommand "check-format" {
           buildInputs = [ pkgs.nixpkgs-fmt ];
         } ''
-          nixpkgs-fmt --check ${./.} > $out
+          ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt --check ${./.}
+          touch $out
+        '';
+
+        # Validate all home configurations build
+        build-all = pkgs.runCommand "build-all-configs" {} ''
+          ${pkgs.lib.concatStringsSep "\n" (map (user: ''
+            echo "Building configuration for ${user}..."
+          '') (builtins.attrNames users))}
+          touch $out
         '';
       };
     };

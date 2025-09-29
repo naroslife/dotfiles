@@ -1,108 +1,340 @@
-{ config, pkgs, lib, ... }:
+{ config
+, pkgs
+, lib
+, nurPackages ? {}
+, ...
+}:
 
+let
+  user = "uif58593";
+  homeDir = "/home/${user}";
+  gitUserName =  "uif58593";
+  gitUserEmail = "robert.4.nagy@aumovio.com";
+
+  # user = if config ? username then config.username else "naroslife";
+  #   # Add this line for debugging:
+  # _ = builtins.trace "DEBUG: home.username = ${user}" null;  homeDir = if config ? homeDirectory then config.homeDirectory else "/home/naroslife";
+  # gitUserName = if config ? gitUserName then config.gitUserName else "naroslife";
+  # gitUserEmail = if config ? gitUserEmail then config.gitUserEmail else "robi54321@gmail.com";
+in
 {
   home.stateVersion = "25.05";
-  home.username = "naroslife";
-  home.homeDirectory = "/home/naroslife";
+  home.username = user;
+  home.homeDirectory = homeDir;
 
   # Packages
   home.packages = with pkgs; [
-    # Essential tools
-    git git-lfs curl wget jq tree bat gnupg stow
-    ripgrep lazygit lazydocker xclip tealdeer shellcheck
-    fd fzf eza most zoxide direnv
-    
-    # History tools (conditionally installed based on programs config)
-    atuin mcfly
-    
-    # WSL-specific utilities
-    wslu        # WSL utilities (wslview, wslpath, wslvar)
-    wl-clipboard # Wayland clipboard (backup for xclip)
-    
-    # Modern CLI replacements
-    duf        # Modern df alternative
-    dust       # Modern du alternative  
-    procs      # Modern ps alternative
-    bottom     # Modern top/htop alternative
-    hyperfine  # Benchmarking tool
-    tokei      # Count lines of code
-    delta      # Better git diff
-    
-    # Network tools
-    nmap xh bandwhich gping
-    
-    # Modern development tools
-    jdk17 maven gradle
-    # gcc gdb clang-tools lldb cppcheck valgrind boost glibc.dev
-    doxygen graphviz
-    go nodejs rustup navi
-        
-    # Modern Git tools
-    gh         # GitHub CLI
-    git-absorb # Better git commit --fixup
-    gitui      # Terminal Git UI
-    
-    # Container and Cloud tools
-    kubectl kubectx
-    docker-compose
-    helm
-    k9s        # Kubernetes TUI
-    
-    # File and text processing
-    yq-go      # YAML processor
-    fx         # JSON viewer
-    miller     # CSV/JSON processor
-    choose     # Human-friendly cut
-    
-    # Shell environments
-    elvish bashInteractive zsh starship
-    
-    # Terminal tools and file managers
-    tmux ranger carapace termscp
-    # nushell    # Modern shell
-    
-    # Completion tools
-    bash-completion zsh-completions
-    
-    # Modern system monitoring
-    lsof
-    htop-vim   # Htop with vim keys
-    
-    # Security and networking
-    rustscan   # Fast port scanner
-    dog        # Modern dig
-    
-    # Productivity tools
-    cheat      # Command cheatsheets
-    broot      # Interactive directory navigator
-    
-    # Archive tools
-    unzip p7zip
+    # === Version Control & Git Tools ===
+    git
+    git-lfs
+    lazygit      # Terminal UI for git commands
+    delta        # Syntax-highlighting pager for git diffs
+    difftastic   # Structural diff that understands syntax trees
+    gitui        # Blazing fast terminal-ui for git
+    gh           # GitHub CLI for managing PRs, issues, etc.
+    git-absorb   # Automatically absorb staged changes into your recent commits
 
+    # === Shell & Terminal Environment ===
+    bashInteractive
+    zsh
+    elvish       # Friendly interactive shell with structured data pipelines
+    starship     # Fast, customizable prompt for any shell
+    bash-completion
+    zsh-completions
+    carapace     # Multi-shell completion engine that works across bash, zsh, fish, etc.
+    tmux
+    direnv       # Load/unload environment variables based on directory
+
+    # === Text Editors ===
+    helix        # Modern modal editor with built-in LSP support
+
+    # === Modern CLI Replacements ===
+    bat          # cat with syntax highlighting and Git integration
+    eza          # Modern ls replacement with colors and git status
+    fd           # User-friendly find alternative
+    ripgrep      # Fast grep replacement written in Rust
+    zoxide       # Smarter cd command that learns your habits
+    duf          # Disk usage/free utility with better UI than df
+    dust         # Intuitive du replacement showing disk usage tree
+    procs        # Modern ps replacement with tree view and search
+    bottom       # Graphical process/system monitor (like htop but more features)
+    htop-vim     # htop with vim keybindings
+    lsof         # List open files and network connections
+    sampler      # Terminal-based visual dashboard for monitoring systems
+    pv           # Monitor progress of data through pipes
+
+    # === File Management & Navigation ===
+    tree
+    ranger       # Console file manager with vi-like keybindings
+    broot        # Interactive tree view, file manager, and launcher
+    stow         # Symlink farm manager for dotfiles
+    termscp      # Terminal file transfer client (SCP/SFTP/FTP/S3)
+    rclone       # Sync files with cloud storage providers (S3, Drive, Dropbox, etc.)
+    restic       # Fast, secure, and efficient backup program
+    qdirstat   # Fast directory statistics and disk usage analyzer
+
+    # === Text/Data Processing ===
+    jq           # JSON processor
+    yq-go        # YAML/JSON/XML/CSV processor (like jq for YAML)
+    fx           # Interactive JSON viewer with mouse support
+    miller       # Like awk/sed/cut/join for CSV, TSV, and JSON
+    choose       # Human-friendly alternative to cut/awk for selecting fields
+    most         # Pager like less but with multiple windows
+    sad          # CLI search and replace with diff preview (Space Age sed)
+    visidata     # Terminal spreadsheet for exploring and arranging tabular data
+
+    # === Network Tools ===
+    curl
+    wget
+    xh           # User-friendly HTTP client (like HTTPie but faster)
+    httpie       # User-friendly HTTP client with intuitive syntax
+    nmap         # Network discovery and security scanning
+    rustscan     # Fast port scanner that pipes to nmap
+    bandwhich    # Terminal bandwidth utilization monitor
+    gping        # Ping with graph visualization
+    dog          # DNS client like dig but with colorful output
+    netcat       # TCP/IP swiss army knife
+    wireshark    # Network protocol analyzer
+    insomnia     # REST and GraphQL API client with GUI
+
+    # === Container & Cloud Tools ===
+    docker-compose
+    lazydocker   # Terminal UI for docker and docker-compose
+    kubectl      # Kubernetes CLI
+    kubectx      # Quickly switch between kubectl contexts
+    k9s          # Terminal UI for Kubernetes clusters
+    helm         # Kubernetes package manager
+
+    # === Database Tools ===
+    pgcli        # PostgreSQL CLI with auto-completion and syntax highlighting
+    usql         # Universal CLI for SQL databases (PostgreSQL, MySQL, SQLite, etc.)
+
+    # === Development - Java ===
+    jdk17
+    maven
+    gradle
+
+    # === Development - C/C++ ===
+    # Compilers & Build Systems
+    gcc
+    # clang
+    cmake
+    ninja        # Small build system focused on speed
+    meson        # Fast and user-friendly build system
+    bazel        # Google's build system for large-scale projects
+    autoconf
+    automake
+    libtool
+    pkg-config
+
+    # C/C++ Libraries
+    boost
+    fmt          # Modern C++ formatting library
+    spdlog       # Fast C++ logging library
+    catch2       # Modern C++ test framework
+    gtest        # Google Test framework
+    eigen        # C++ template library for linear algebra
+    opencv       # Computer vision library
+    qt6.full
+    gtk4
+    glfw         # OpenGL/Vulkan window and input library
+    glew         # OpenGL Extension Wrangler
+    vulkan-headers
+    vulkan-loader
+    glibc.dev
+    openssl
+    ncurses.dev
+    libcap.dev   # POSIX capabilities library
+    systemd.dev
+
+    # C/C++ Tools
+    clang-tools  # clang-format, clang-tidy, etc.
+    cppcheck     # Static analysis tool for C/C++
+    valgrind     # Memory debugging and profiling
+    gdb          # GNU debugger
+    lldb         # LLVM debugger
+    rr           # Record and replay debugger for C/C++ (time-travel debugging)
+    sccache      # Shared compilation cache for C/C++/Rust (speeds up builds)
+    strace       # Trace system calls and signals
+    ltrace       # Trace library calls
+    perf-tools   # Performance analysis tools
+
+    # === Development - Other Languages ===
+    go
+    nodejs
+    rustup       # Rust toolchain installer
+
+    # === Documentation & Code Quality ===
+    doxygen      # Documentation generator from source code
+    graphviz     # Graph visualization software
+    pandoc       # Universal document converter
+    glow         # Render markdown files beautifully in the terminal
+    obsidian     # Knowledge base and note-taking app with graph view
+    shellcheck   # Shell script static analysis
+    shfmt        # Shell script formatter
+    tokei        # Count lines of code quickly
+    hyperfine    # Command-line benchmarking tool
+
+    # === Learning & Productivity ===
+    tealdeer     # Fast tldr pages implementation (command examples)
+    cheat        # Create and view interactive cheatsheets
+    navi         # Interactive cheatsheet tool with shell integration
+
+    # === Security & Encryption ===
+    gnupg        # GNU Privacy Guard
+    pass         # Unix password manager using GPG
+
+    # === Utilities ===
+    xclip        # X11 clipboard interface
+    wl-clipboard # Wayland clipboard utilities
+    nix-prefetch-git  # Prefetch git repos for Nix expressions
+    gettext      # Internationalization tools
+    file         # Determine file types
+    hexdump      # Display file contents in hex
+    xxd          # Hex dump and reverse
+    unzip
+    p7zip        # 7-Zip file archiver
+
+    # === WSL Specific ===
+    wslu         # Windows Subsystem for Linux utilities (wslview, wslpath, etc.)
+    # vcxsrv       # X server for Windows (enables GUI apps in WSL)
+
+    # === Language-specific Package Managers ===
+    # Python with common packages
+    (python3.withPackages (ps: with ps; [
+      pycodestyle  # Python style checker
+      black        # Uncompromising Python formatter
+      mypy         # Static type checker
+      pytest       # Testing framework
+      requests     # HTTP library
+    ]))
+
+    # Ruby with tmuxinator
+    (ruby.withPackages (rbps: with rbps; [
+      tmuxinator   # Manage tmux sessions easily
+    ]))
+
+    # === Shell History Tools (conditional) ===
+    atuin        # Magical shell history using SQLite
+    mcfly        # Intelligent command history search using neural networks
+
+    # === Custom Scripts ===
     (writeShellScriptBin "claude-code" ''
       # Use npx to run the package (downloads/caches on first run)
       exec ${nodejs}/bin/npx -y @anthropic-ai/claude-code "$@"
-      # For a pinned version, use:
-      # exec ${nodejs}/bin/npx -y @anthropic-ai/claude-code@<version> "$@"
     '')
-    
-    # Python with packages (version 3.12.5 as per .tool-versions)
-    (python3.withPackages (ps: with ps; [
-      pycodestyle
-      black      # Code formatter
-      mypy       # Type checker
-      pytest     # Testing framework
-      requests   # HTTP library
-    ]))
 
-    # Ruby with packages (version 3.3.4 as per .tool-versions)
-    (ruby.withPackages (rbps: with rbps; [
-      tmuxinator
-    ]))
-    
-    # Util-linux build dependencies
-    autoconf automake libtool gettext pkg-config
-    ncurses.dev libcap.dev systemd.dev
+    # APT network switching scripts for WSL with Continental repos
+    (writeShellScriptBin "apt-network-switch" ''
+          #!/usr/bin/env bash
+          
+          # Colors for output
+          RED='\033[0;31m'
+          GREEN='\033[0;32m'
+          YELLOW='\033[1;33m'
+          NC='\033[0m' # No Color
+          
+          # Configuration
+          CORP_HOST="geo.artifactory.automotive.cloud"
+          CORP_TEST_IPS=("10.68.10.71" "10.68.8.19" "10.68.10.193")
+          SOURCES_DIR="/etc/apt/sources.list.d"
+          DISABLED_DIR="$SOURCES_DIR/disabled"
+          
+          # Function to test corporate network connectivity - FAST VERSION
+          test_corporate_network() {
+              # Quick test: try to connect to first IP on port 443 (very fast)
+              timeout 0.5 bash -c "echo >/dev/tcp/10.68.10.71/443" &>/dev/null && return 0
+              
+              # If that fails, try a quick ping to any corporate IP
+              for ip in "''${CORP_TEST_IPS[@]}"; do
+                  timeout 0.2 ping -c 1 -W 1 "$ip" &>/dev/null && return 0
+              done
+              
+              return 1
+          }
+          
+          # Parse command line arguments
+          FORCE_MODE=""
+          if [[ "$1" == "--force-corp" ]] || [[ "$1" == "-c" ]]; then
+              FORCE_MODE="corp"
+          elif [[ "$1" == "--force-public" ]] || [[ "$1" == "-p" ]]; then
+              FORCE_MODE="public"
+          elif [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+              echo "Usage: apt-network-switch [OPTIONS]"
+              echo "  -c, --force-corp     Force corporate repositories"
+              echo "  -p, --force-public   Force public repositories"
+              echo "  -h, --help          Show this help message"
+              exit 0
+          fi
+          
+          if [[ -n "$FORCE_MODE" ]]; then
+              echo -e "''${YELLOW}Forcing $FORCE_MODE mode...''${NC}"
+              if [[ "$FORCE_MODE" == "corp" ]]; then
+                  network_detected=0
+              else
+                  network_detected=1
+              fi
+          else
+              echo -e "''${YELLOW}Quick network detection...''${NC}"
+              test_corporate_network
+              network_detected=$?
+          fi
+          
+          if [[ $network_detected -eq 0 ]]; then
+              echo -e "''${GREEN}✓ Corporate network detected (Continental/Automotive)''${NC}"
+              
+              # Enable corporate sources
+              if [ -d "$DISABLED_DIR" ] && [ "$(ls -A $DISABLED_DIR 2>/dev/null)" ]; then
+                  echo "Enabling corporate Artifactory repositories..."
+                  sudo mv $DISABLED_DIR/*.list $SOURCES_DIR/ 2>/dev/null
+              fi
+              
+              # Clear public sources
+              if [ -s /etc/apt/sources.list ]; then
+                  sudo cp /etc/apt/sources.list /etc/apt/sources.list.public-backup
+                  echo "# Corporate network - using sources.list.d/*" | sudo tee /etc/apt/sources.list > /dev/null
+              fi
+              
+              echo -e "''${GREEN}APT configured for corporate network''${NC}"
+              
+          else
+              echo -e "''${YELLOW}✗ Home/Public network detected''${NC}"
+              
+              # Disable corporate sources
+              sudo mkdir -p "$DISABLED_DIR"
+              if [ "$(ls -A $SOURCES_DIR/*.list 2>/dev/null)" ]; then
+                  echo "Disabling corporate repositories..."
+                  sudo mv $SOURCES_DIR/*.list $DISABLED_DIR/ 2>/dev/null
+              fi
+              
+              # Enable public Ubuntu sources
+              if [ ! -s /etc/apt/sources.list ] || grep -q "using sources.list.d" /etc/apt/sources.list; then
+                  echo "Enabling public Ubuntu repositories..."
+                  cat << 'SOURCES' | sudo tee /etc/apt/sources.list > /dev/null
+          # Ubuntu 22.04 (Jammy) repositories
+          deb http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse
+          deb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse
+          deb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse
+          deb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
+          
+          # Docker CE repository (public)
+          # deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable
+          SOURCES
+              fi
+              
+              echo -e "''${GREEN}APT configured for public network''${NC}"
+          fi
+          
+          echo -e "\n''${YELLOW}Running apt update...''${NC}"
+          sudo apt update
+          
+          if [ $? -eq 0 ]; then
+              echo -e "\n''${GREEN}✓ APT update successful!''${NC}"
+          else
+              echo -e "\n''${RED}✗ APT update failed. Check your network connection.''${NC}"
+              exit 1
+          fi
+        '')
   ];
 
   # Shell configuration
@@ -124,7 +356,7 @@
       unset PKG_CONFIG_LIBDIR
       
       # PATH additions
-      export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$HOME/.npm-global/bin:./node_modules/.bin:$PATH
+      export PATH=$HOME/.claude/local:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.cargo/bin:$HOME/.npm-global/bin:./node_modules/.bin:$PATH
       
       # KUBECONFIG
       export KUBECONFIG=~/.kube/config
@@ -455,6 +687,14 @@
       # Git improvements
       gd = "git diff";
       gdt = "git difftool";
+
+      claude = "~/.claude/local/claude";
+
+      # APT network management (Continental/WSL specific)
+      apt-switch = "apt-network-switch";
+      apt-update = "apt-network-switch";  # Override default with network-aware version
+      apt-check = "apt-status";
+      apt-public = "echo 'Forcing public repos...' && sudo mkdir -p /etc/apt/sources.list.d/disabled && sudo mv /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/disabled/ 2>/dev/null; echo 'deb http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse\ndeb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse' | sudo tee /etc/apt/sources.list > /dev/null && sudo apt update";
     
     };
 
@@ -554,10 +794,16 @@
       # Git improvements
       gd = "git diff";
       gdt = "git difftool";
+
+      # APT network management (Continental/WSL specific)
+      apt-switch = "apt-network-switch";
+      apt-update = "apt-network-switch";  # Override default with network-aware version
+      apt-check = "apt-status";
+      apt-public = "echo 'Forcing public repos...' && sudo mkdir -p /etc/apt/sources.list.d/disabled && sudo mv /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/disabled/ 2>/dev/null; echo 'deb http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse\ndeb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse' | sudo tee /etc/apt/sources.list > /dev/null && sudo apt update";
     
     };
     
-    initExtra = ''
+    initContent = ''
       # Source Nix
       if [ -e "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh" ]; then
         source "$HOME/.nix-profile/etc/profile.d/nix-daemon.sh"
@@ -864,6 +1110,8 @@
 
   programs.git = {
     enable = true;
+    userName = gitUserName;
+    userEmail = gitUserEmail;
     extraConfig = {
       core = {
         editor = "code";

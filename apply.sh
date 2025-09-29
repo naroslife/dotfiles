@@ -49,6 +49,7 @@ if ! command_exists nix; then
         sh <(curl -L https://nixos.org/nix/install) --daemon
 
         # Source Nix
+        # shellcheck disable=SC1091
         if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
             . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
         fi
@@ -96,7 +97,7 @@ if grep -q "\"$CURRENT_USER\"" flake.nix 2>/dev/null; then
 else
     print_color "$YELLOW" "No configuration found for $CURRENT_USER"
     print_color "$YELLOW" "Available configurations: naroslife, uif58593"
-    read -p "Enter username to use: " USERNAME
+    read -r -p "Enter username to use: " USERNAME
 
     if ! grep -q "\"$USERNAME\"" flake.nix 2>/dev/null; then
         print_color "$RED" "Invalid username. Exiting."

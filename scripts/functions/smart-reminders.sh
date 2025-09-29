@@ -3,19 +3,21 @@
 
 # Counter for tracking command usage
 if [[ ! -f ~/.command_counter ]]; then
-  echo "cd=0" > ~/.command_counter
-  echo "find=0" >> ~/.command_counter
-  echo "htop=0" >> ~/.command_counter
-  echo "top=0" >> ~/.command_counter
-  echo "ls=0" >> ~/.command_counter
-  echo "du=0" >> ~/.command_counter
-  echo "df=0" >> ~/.command_counter
-  echo "ps=0" >> ~/.command_counter
-  echo "ping=0" >> ~/.command_counter
-  echo "dig=0" >> ~/.command_counter
-  echo "git_diff=0" >> ~/.command_counter
-  echo "man=0" >> ~/.command_counter
-  echo "wc=0" >> ~/.command_counter
+  {
+    echo "cd=0"
+    echo "find=0"
+    echo "htop=0"
+    echo "top=0"
+    echo "ls=0"
+    echo "du=0"
+    echo "df=0"
+    echo "ps=0"
+    echo "ping=0"
+    echo "dig=0"
+    echo "git_diff=0"
+    echo "man=0"
+    echo "wc=0"
+  } > ~/.command_counter
 fi
 
 # Function to show reminder and increment counter
@@ -26,7 +28,8 @@ show_reminder() {
   local alternative="$2"
   local description="$3"
   local counter_file=~/.command_counter
-  local current_count=$(grep "^$cmd=" "$counter_file" | cut -d= -f2 2>/dev/null || echo 0)
+  local current_count
+  current_count=$(grep "^$cmd=" "$counter_file" | cut -d= -f2 2>/dev/null || echo 0)
 
   # Show reminder every 5th usage
   if (( current_count % 5 == 4 )); then
@@ -44,10 +47,10 @@ cd() {
     if command -v __zoxide_z >/dev/null 2>&1; then
       __zoxide_z "$@"
     else
-      builtin cd "$@"
+      builtin cd "$@" || return
     fi
   else
-    builtin cd "$@"
+    builtin cd "$@" || return
   fi
 }
 

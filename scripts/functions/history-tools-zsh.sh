@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck shell=bash
 # History tool switching functions for zsh
 
 # Runtime history tool switcher for zsh

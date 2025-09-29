@@ -7,7 +7,6 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-CORP_HOST="geo.artifactory.automotive.cloud"
 CORP_TEST_IPS=("10.68.10.71" "10.68.8.19" "10.68.10.193")
 SOURCES_DIR="/etc/apt/sources.list.d"
 DISABLED_DIR="$SOURCES_DIR/disabled"
@@ -111,9 +110,7 @@ fi
 # Only run apt update if not in quiet mode
 if [[ -z "$QUIET_MODE" ]]; then
     log "\n${YELLOW}Running apt update...${NC}"
-    sudo apt update
-
-    if [ $? -eq 0 ]; then
+    if sudo apt update; then
         log "\n${GREEN}✓ APT update successful!${NC}"
     else
         log "\n${RED}✗ APT update failed. Check your network connection.${NC}"

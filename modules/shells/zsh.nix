@@ -83,12 +83,17 @@
         zstyle ':completion:*:descriptions' format '[%d]'
         # Set list-colors to enable filename colorizing
         zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
+        # Show completion descriptions (important for carapace)
+        zstyle ':completion:*' verbose yes
+        zstyle ':completion:*' group-name '''
         # Preview directory's content with eza when completing cd
         zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
         # Switch group using `,` and `.`
         zstyle ':fzf-tab:*' switch-group ',' '.'
         # Use tmux popup for fzf-tab (if in tmux)
         zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+        # Enable continuous completion trigger
+        zstyle ':fzf-tab:*' continuous-trigger '/'
 
         # Initialize carapace completion for zsh
         if command -v carapace >/dev/null 2>&1; then

@@ -48,28 +48,36 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 # Ensure DISPLAY is set
 export DISPLAY="${DISPLAY:-:0}"
 
-# Fix LD_LIBRARY_PATH conflicts from CUDA installation
-# AppImages bundle their own libraries and LD_LIBRARY_PATH can cause conflicts
-# Completely unset it to let the AppImage use its bundled libraries
-if [[ -n "${LD_LIBRARY_PATH:-}" ]]; then
-    echo "  Unsetting LD_LIBRARY_PATH to avoid library conflicts"
-    unset LD_LIBRARY_PATH
+# Fix environment variable conflicts from CUDA/Nix that cause slow Electron startup
+# These variables can cause 60+ second delays in Electron initialization
+unset LD_LIBRARY_PATH CUDA_HOME CUDA_PATH
+unset LOCALE_ARCHIVE_2_27 NIX_PROFILES __ETC_PROFILE_NIX_SOURCED
+
+# Reset JAVA_HOME to system default if using Nix Java
+if [[ "$JAVA_HOME" == *"/nix/store/"* ]]; then
+    if [[ -d "/usr/lib/jvm/default-java" ]]; then
+        export JAVA_HOME="/usr/lib/jvm/default-java"
+    else
+        unset JAVA_HOME
+    fi
 fi
+
+echo "  Cleaned environment variables (removed CUDA/Nix conflicts)"
 
 # Disable VA-API to prevent libva errors
 export LIBVA_DRIVER_NAME=none
 
 # GPU rendering configuration for WSL2
-# Try hardware acceleration first with D3D12 (WSLg)
+# Enable GPU acceleration with optimized flags for WSLg
 export MESA_LOADER_DRIVER_OVERRIDE=d3d12
+export MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA
 
-# Electron flags to improve WSL2 compatibility
-# Note: If window doesn't appear, try commenting out --disable-software-rasterizer
-# or set LIBGL_ALWAYS_SOFTWARE=1 for full software rendering
-export ELECTRON_EXTRA_LAUNCH_ARGS="--disable-gpu-sandbox --no-sandbox --disable-dev-shm-usage --disable-features=VaapiVideoDecoder"
-
-# Uncomment if window doesn't appear (forces software rendering):
-# export LIBGL_ALWAYS_SOFTWARE=1
+# Electron flags optimized for WSL2/WSLg performance
+# Try software rendering first for compatibility, then GPU if that's slow
+# To enable GPU: uncomment the GPU line and comment the software line
+export ELECTRON_EXTRA_LAUNCH_ARGS="--no-sandbox --disable-dev-shm-usage --disable-gpu --in-process-gpu --disable-software-rasterizer"
+# GPU acceleration (comment above, uncomment below):
+# export ELECTRON_EXTRA_LAUNCH_ARGS="--no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-features=VulkanFromANGLE --use-gl=angle --ignore-gpu-blocklist --disable-features=VaapiVideoDecoder"
 
 # Disable Wayland (use X11 instead for better compatibility)
 export GDK_BACKEND=x11

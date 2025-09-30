@@ -20,12 +20,20 @@ export DISPLAY=:0
 export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS}"
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
-# Fix LD_LIBRARY_PATH conflicts from CUDA installation
-# AppImages bundle their own libraries and LD_LIBRARY_PATH causes conflicts
-if [[ -n "${LD_LIBRARY_PATH:-}" ]]; then
-    echo "  Unsetting LD_LIBRARY_PATH to avoid library conflicts"
-    unset LD_LIBRARY_PATH
+# Fix environment variable conflicts from CUDA/Nix that cause slow Electron startup
+unset LD_LIBRARY_PATH CUDA_HOME CUDA_PATH
+unset LOCALE_ARCHIVE_2_27 NIX_PROFILES __ETC_PROFILE_NIX_SOURCED
+
+# Reset JAVA_HOME to system default if using Nix Java
+if [[ "$JAVA_HOME" == *"/nix/store/"* ]]; then
+    if [[ -d "/usr/lib/jvm/default-java" ]]; then
+        export JAVA_HOME="/usr/lib/jvm/default-java"
+    else
+        unset JAVA_HOME
+    fi
 fi
+
+echo "  Cleaned environment (removed CUDA/Nix conflicts)"
 
 # Force software rendering (most reliable for Electron apps on WSLg)
 export LIBGL_ALWAYS_SOFTWARE=1

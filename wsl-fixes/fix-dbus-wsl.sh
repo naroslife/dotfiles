@@ -4,66 +4,85 @@
 # This ensures a proper DBus session is available
 #
 
-# Try to load existing DBus session first
-if [[ -f ~/.dbus-session ]] && [[ -z "$DBUS_SESSION_BUS_ADDRESS" ]]; then
+# If DBUS_SESSION_BUS_ADDRESS is already set and working, nothing to do
+if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]; then
+    if dbus-send --session --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.ListNames &>/dev/null; then
+        echo "DBus already configured: $DBUS_SESSION_BUS_ADDRESS"
+        return 0 2>/dev/null || exit 0
+    else
+        # Address set but not working, clear it
+        unset DBUS_SESSION_BUS_ADDRESS
+        unset DBUS_SESSION_BUS_PID
+    fi
+fi
+
+# Try to load existing DBus session from saved file
+if [[ -f ~/.dbus-session ]]; then
     source ~/.dbus-session 2>/dev/null
     # Verify the loaded session is still valid
-    if [[ -n "$DBUS_SESSION_BUS_PID" ]] && kill -0 "$DBUS_SESSION_BUS_PID" 2>/dev/null; then
-        # Export the variables so they're available in the current shell
-        export DBUS_SESSION_BUS_ADDRESS
-        export DBUS_SESSION_BUS_PID
-        echo "Reusing existing DBus session (PID: $DBUS_SESSION_BUS_PID)"
+    if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]; then
+        if dbus-send --session --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.ListNames &>/dev/null; then
+            # Export the variables so they're available in the current shell
+            export DBUS_SESSION_BUS_ADDRESS
+            export DBUS_SESSION_BUS_PID
+            if [[ -n "$DBUS_SESSION_BUS_PID" ]]; then
+                echo "Reusing saved DBus session (PID: $DBUS_SESSION_BUS_PID)"
+            else
+                echo "Reusing saved DBus session"
+            fi
+            echo "DBus configured: $DBUS_SESSION_BUS_ADDRESS"
+            return 0 2>/dev/null || exit 0
+        else
+            # Saved session not responsive, clear it
+            rm -f ~/.dbus-session 2>/dev/null
+            unset DBUS_SESSION_BUS_ADDRESS
+            unset DBUS_SESSION_BUS_PID
+        fi
+    fi
+fi
+
+# Check if systemd DBus socket exists and is responsive
+if [[ -S "/run/user/$(id -u)/bus" ]]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+    if dbus-send --session --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.ListNames &>/dev/null; then
+        # Save this for future shells
+        echo "export DBUS_SESSION_BUS_ADDRESS='$DBUS_SESSION_BUS_ADDRESS'" > ~/.dbus-session
+        echo "Using system DBus daemon at /run/user/$(id -u)/bus"
         echo "DBus configured: $DBUS_SESSION_BUS_ADDRESS"
         return 0 2>/dev/null || exit 0
-    fi
-fi
-
-# Check if we need to start a DBus session
-# Don't rely on socket existence alone - verify daemon is actually running
-NEED_NEW_SESSION=false
-
-if [[ -z "$DBUS_SESSION_BUS_PID" ]] || ! kill -0 "$DBUS_SESSION_BUS_PID" 2>/dev/null; then
-    # No valid PID, need to check if daemon is actually responsive
-    if [[ -S "/run/user/$(id -u)/bus" ]]; then
-        # Socket exists, test if it's responsive
-        if ! dbus-send --session --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.ListNames &>/dev/null; then
-            # Socket exists but not responsive
-            NEED_NEW_SESSION=true
-        else
-            # Socket is responsive, use it
-            export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
-            echo "Using existing DBus daemon at /run/user/$(id -u)/bus"
-        fi
     else
-        # No socket, definitely need new session
-        NEED_NEW_SESSION=true
+        # Socket exists but not responsive, unset and continue
+        unset DBUS_SESSION_BUS_ADDRESS
     fi
 fi
 
-if [[ "$NEED_NEW_SESSION" == "true" ]]; then
-    # Clean up any stale DBus info
-    rm -f ~/.dbus-session 2>/dev/null
+# No existing session found, start a new one with dbus-launch
+echo "Starting new DBus session..."
 
-    # Kill any orphaned dbus-daemon processes
-    pkill -u $(id -u) dbus-daemon 2>/dev/null || true
-    sleep 0.2
+# Kill any orphaned dbus-daemon processes
+pkill -u $(id -u) dbus-daemon 2>/dev/null || true
+sleep 0.2
 
-    # Start dbus-daemon and save the address
-    eval $(dbus-launch --sh-syntax --exit-with-session)
+# Start dbus-daemon and save the address
+eval $(dbus-launch --sh-syntax --exit-with-session)
 
-    # Save for future shells
-    echo "export DBUS_SESSION_BUS_ADDRESS='$DBUS_SESSION_BUS_ADDRESS'" > ~/.dbus-session
+if [[ -z "$DBUS_SESSION_BUS_ADDRESS" ]]; then
+    echo "Error: Failed to start DBus session"
+    return 1 2>/dev/null || exit 1
+fi
+
+# Save for future shells
+echo "export DBUS_SESSION_BUS_ADDRESS='$DBUS_SESSION_BUS_ADDRESS'" > ~/.dbus-session
+if [[ -n "$DBUS_SESSION_BUS_PID" ]]; then
     echo "export DBUS_SESSION_BUS_PID='$DBUS_SESSION_BUS_PID'" >> ~/.dbus-session
+fi
 
-    # Wait for daemon to be ready
-    sleep 0.3
+# Wait for daemon to be ready
+sleep 0.3
 
+if [[ -n "$DBUS_SESSION_BUS_PID" ]]; then
     echo "Started new DBus session (PID: $DBUS_SESSION_BUS_PID)"
-fi
-
-# Display current DBus status
-if [[ -n "$DBUS_SESSION_BUS_ADDRESS" ]]; then
-    echo "DBus configured: $DBUS_SESSION_BUS_ADDRESS"
 else
-    echo "Warning: DBus not configured"
+    echo "Started new DBus session"
 fi
+echo "DBus configured: $DBUS_SESSION_BUS_ADDRESS"

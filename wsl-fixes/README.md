@@ -1,6 +1,17 @@
 # WSL2 AppImage & Electron App Fix
 
-This guide fixes common issues running AppImages and Electron apps on WSL2.
+This directory contains scripts and documentation for fixing common issues when running AppImages and Electron apps on WSL2.
+
+## Repository Structure
+
+```
+wsl-fixes/
+├── README.md              - This file
+├── fix-dbus-wsl.sh        - DBus session configuration
+└── launch-appimage.sh     - Universal AppImage launcher
+```
+
+Scripts are symlinked to `~/.local/bin/` for PATH access and automatically loaded via `wsl-init.sh`.
 
 ## Common Issues Fixed
 
@@ -25,7 +36,7 @@ chmod +x ./Next-Client-1.10.0.AppImage
 
 ```bash
 # Source DBus fix
-source ~/.local/bin/fix-dbus-wsl.sh
+source ~/dotfiles/wsl-fixes/fix-dbus-wsl.sh
 
 # Set environment variables
 export MESA_LOADER_DRIVER_OVERRIDE=d3d12
@@ -36,20 +47,24 @@ export ELECTRON_EXTRA_LAUNCH_ARGS="--disable-gpu-sandbox --disable-software-rast
 ./Next-Client-1.10.0.AppImage
 ```
 
-## Files Created
+## Files in This Directory
 
 ### 1. DBus Fix Script
-**Location:** `~/.local/bin/fix-dbus-wsl.sh`
+**File:** `fix-dbus-wsl.sh`
+**Symlinked to:** `~/.local/bin/fix-dbus-wsl.sh`
 
 Ensures DBus session is properly configured for Electron apps.
 
 **Usage:**
 ```bash
+source ~/dotfiles/wsl-fixes/fix-dbus-wsl.sh
+# or via symlink
 source ~/.local/bin/fix-dbus-wsl.sh
 ```
 
 ### 2. AppImage Launcher
-**Location:** `~/.local/bin/launch-appimage.sh`
+**File:** `launch-appimage.sh`
+**Symlinked to:** `~/.local/bin/launch-appimage.sh`
 
 Universal launcher that applies all WSL2 fixes automatically.
 

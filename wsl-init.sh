@@ -69,7 +69,7 @@ if is_wsl; then
 	umask 022
 
 	# Fix DBus for Electron/AppImage apps
-	if [[ -f "$HOME/.local/bin/fix-dbus-wsl.sh" ]]; then
-		source "$HOME/.local/bin/fix-dbus-wsl.sh" 2>/dev/null
+	if [[ -f "$HOME/dotfiles/wsl-fixes/fix-dbus-wsl.sh" ]]; then
+		source "$HOME/dotfiles/wsl-fixes/fix-dbus-wsl.sh" 2>/dev/null
 	fi
 fi

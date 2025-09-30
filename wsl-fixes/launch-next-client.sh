@@ -57,5 +57,17 @@ echo "  GPU: DISABLED"
 echo "  Working directory: $(pwd)"
 echo
 
-# Launch the AppImage
-exec "$APPIMAGE" "$@"
+# Launch with clean environment to avoid slow startup from Nix/CUDA variables
+exec env -i \
+    HOME="$HOME" \
+    USER="$USER" \
+    SHELL="$SHELL" \
+    DISPLAY="$DISPLAY" \
+    DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
+    XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+    LIBVA_DRIVER_NAME="$LIBVA_DRIVER_NAME" \
+    GDK_BACKEND="$GDK_BACKEND" \
+    LIBGL_ALWAYS_SOFTWARE="$LIBGL_ALWAYS_SOFTWARE" \
+    ELECTRON_EXTRA_LAUNCH_ARGS="$ELECTRON_EXTRA_LAUNCH_ARGS" \
+    PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin" \
+    "$APPIMAGE" "$@"

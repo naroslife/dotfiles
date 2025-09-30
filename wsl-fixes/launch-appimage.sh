@@ -102,5 +102,19 @@ if [[ -d "$CONFIG_DIR" ]]; then
     echo
 fi
 
-# Launch the AppImage
-exec "$APPIMAGE" "$@"
+# Launch with clean environment to avoid slow startup from Nix/CUDA variables
+# Only preserve essential variables for GUI apps
+exec env -i \
+    HOME="$HOME" \
+    USER="$USER" \
+    SHELL="$SHELL" \
+    DISPLAY="$DISPLAY" \
+    DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
+    XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+    LIBVA_DRIVER_NAME="$LIBVA_DRIVER_NAME" \
+    GDK_BACKEND="$GDK_BACKEND" \
+    ELECTRON_EXTRA_LAUNCH_ARGS="$ELECTRON_EXTRA_LAUNCH_ARGS" \
+    MESA_LOADER_DRIVER_OVERRIDE="$MESA_LOADER_DRIVER_OVERRIDE" \
+    MESA_D3D12_DEFAULT_ADAPTER_NAME="$MESA_D3D12_DEFAULT_ADAPTER_NAME" \
+    PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin" \
+    "$APPIMAGE" "$@"

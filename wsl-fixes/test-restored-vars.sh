@@ -73,12 +73,5 @@ echo "Starting application with restored variables..."
 echo "Press Ctrl+C to stop if it hangs."
 echo ""
 
-# Build env string
-env_str=""
-for var in "${ALL_VARS[@]}"; do
-    env_str="$env_str $var"
-done
-
-# Launch with timing
-start=$(date +%s.%N)
-exec env -i $env_str "$APPIMAGE" "$@"
+# Launch with restored variables
+exec env -i "${ALL_VARS[@]}" "$APPIMAGE" "$@"

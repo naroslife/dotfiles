@@ -67,4 +67,9 @@ if is_wsl; then
 
 	# Ensure proper umask for Windows compatibility
 	umask 022
+
+	# Fix DBus for Electron/AppImage apps
+	if [[ -f "$HOME/.local/bin/fix-dbus-wsl.sh" ]]; then
+		source "$HOME/.local/bin/fix-dbus-wsl.sh" 2>/dev/null
+	fi
 fi

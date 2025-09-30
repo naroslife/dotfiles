@@ -66,5 +66,19 @@ echo "  DBUS: $DBUS_SESSION_BUS_ADDRESS"
 echo "  XDG_RUNTIME_DIR: $XDG_RUNTIME_DIR"
 echo
 
+# Detect config directory for the app
+# Extract app name from AppImage filename (e.g., Next-Client-1.10.0.AppImage -> Next-Client)
+APPIMAGE_BASENAME=$(basename "$APPIMAGE")
+APP_NAME=$(echo "$APPIMAGE_BASENAME" | sed -E 's/-[0-9]+\.[0-9]+\.[0-9]+\.AppImage$//')
+
+# Change to app config directory if it exists
+# This helps apps that look for settings.json in the current directory
+CONFIG_DIR="$HOME/.config/$APP_NAME"
+if [[ -d "$CONFIG_DIR" ]]; then
+    cd "$CONFIG_DIR"
+    echo "Working directory: $CONFIG_DIR"
+    echo
+fi
+
 # Launch the AppImage
 exec "$APPIMAGE" "$@"

@@ -69,26 +69,62 @@ Base + 145 extra vars:   ✗ SLOW (60s+ timeout)
 - With all 155 variables: **60+ seconds**, often never completes initialization
 - Clean environment (7 vars): **2-3 seconds**
 
+## CRITICAL UPDATE: It's NOT Variable Count!
+
+### Additional Testing with Dummy Variables
+
+Further testing revealed a surprising finding:
+- **150 dummy variables (158 total)**: ✓ FAST (5s)
+- **155 REAL variables**: ✗ SLOW (30s+)
+
+**Conclusion**: The problem is NOT the number of variables, but **specific content or total byte size**.
+
+### Environment Size Analysis
+
+```
+Real environment total size: 6,399 bytes
+Number of variables: 155
+
+Longest variables:
+- PATH: 910 bytes
+- LD_LIBRARY_PATH: 205 bytes
+- VSCODE_GIT_ASKPASS_MAIN: 134 bytes
+- LOCALE_ARCHIVE_2_27: 111 bytes
+```
+
+The extremely long `PATH` (910 bytes) and cumulative byte size appear to be the real culprits.
+
 ## Root Cause Analysis
 
-### The Real Problem: Environment Table Size
+### The Real Problem: Specific Real Variables Beyond ~10-15 Count
 
-The issue is **not** specific variables but the **cumulative size** of the environment:
+**Critical Discovery Through Dummy Variable Testing:**
 
-1. **Electron/Chromium Behavior**:
-   - Electron processes the entire environment table at startup
-   - With 155 variables, this becomes computationally expensive
-   - The environment is inherited by multiple child processes (renderer, GPU process, etc.)
+| Test Configuration | Result |
+|-------------------|--------|
+| 150 dummy variables | ✓ FAST (5s) |
+| 10 real variables | ✓ FAST (5s) |
+| 20+ real variables | ✗ SLOW (15s+ timeout) |
+| All CUDA/Nix suspects alone | ✓ FAST (2-3s) |
+| All suspects combined | ✓ FAST (5s) |
 
-2. **WSL2 Factor**:
-   - WSL2 may have additional overhead in environment handling
-   - The Nix/home-manager setup creates many path-related variables
-   - Each variable with Nix store paths is particularly long
+**Conclusion**: The issue is with **specific real environment variables** beyond the first ~10-15, NOT:
+- The total number of variables (150 dummies work fine)
+- The byte size alone (PATH=910 bytes works fine alone)
+- Specific suspect variables (all fast individually and combined)
 
-3. **Threshold Effect**:
-   - Around 15-18 variables: Electron handles efficiently
-   - Beyond 18 variables: Performance degrades exponentially
-   - At 155 variables: Effectively unusable
+### Why Some Variables Cause Slowness
+
+The problematic behavior appears when combining:
+1. **Many variables** (>15-20)
+2. **Real environment variables** from the actual shell environment
+3. Potentially **related variables** that interact (PATH, LD_LIBRARY_PATH, locale, Nix paths)
+
+**Hypothesis**: Electron/Chromium may be:
+- Parsing/validating certain variable combinations
+- Looking for specific patterns in environment variables
+- Attempting library/path resolution based on multiple variables together
+- Inheriting and processing the environment across multiple child processes where cumulative real-variable interactions create exponential overhead
 
 ## Solution: Clean Environment Approach
 

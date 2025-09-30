@@ -9,6 +9,9 @@ if [[ -f ~/.dbus-session ]] && [[ -z "$DBUS_SESSION_BUS_ADDRESS" ]]; then
     source ~/.dbus-session 2>/dev/null
     # Verify the loaded session is still valid
     if [[ -n "$DBUS_SESSION_BUS_PID" ]] && kill -0 "$DBUS_SESSION_BUS_PID" 2>/dev/null; then
+        # Export the variables so they're available in the current shell
+        export DBUS_SESSION_BUS_ADDRESS
+        export DBUS_SESSION_BUS_PID
         echo "Reusing existing DBus session (PID: $DBUS_SESSION_BUS_PID)"
         echo "DBus configured: $DBUS_SESSION_BUS_ADDRESS"
         return 0 2>/dev/null || exit 0

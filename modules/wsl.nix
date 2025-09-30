@@ -15,10 +15,15 @@
     WSLENV = "PATH/l:XDG_CONFIG_HOME/up";
     # Improve performance by using Windows TEMP for temporary files
     TMPDIR = "/tmp";
-    PATH = "$HOME/.local/bin:$PATH";
+    PATH = "$HOME/.local/bin:/usr/local/cuda/bin:$PATH";
+
+    # NVIDIA CUDA configuration for WSL2
+    CUDA_HOME = "/usr/local/cuda";
+    CUDA_PATH = "/usr/local/cuda";
 
     # Add custom library paths (keeps existing LD_LIBRARY_PATH if set)
-    LD_LIBRARY_PATH = "${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freediameter/lib:${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freeradius/lib:$LD_LIBRARY_PATH";
+    # Includes WSL NVIDIA libraries and CUDA paths
+    LD_LIBRARY_PATH = "/usr/lib/wsl/lib:/usr/local/cuda/lib64:${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freediameter/lib:${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freeradius/lib:$LD_LIBRARY_PATH";
   };
 
   # WSL-specific aliases

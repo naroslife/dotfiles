@@ -72,3 +72,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modern CLI tools (eza, bat, fd, ripgrep, etc.)
 - Development toolchains for multiple languages
 - Elvish as primary shell with Zsh and Bash support
+### Interactive Features
+- Added fzf-tab plugin for ZSH with interactive, visual completion menu
+- Completion menu shows previews (e.g., directory contents with `eza`)
+- Colorized completion entries matching file colors
+- Group switching with `,` and `.` keys
+- Tmux popup support when running in tmux

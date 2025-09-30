@@ -6,6 +6,19 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
+    # Interactive completion with fzf
+    plugins = [
+      {
+        name = "fzf-tab";
+        src = pkgs.fetchFromGitHub {
+          owner = "Aloxaf";
+          repo = "fzf-tab";
+          rev = "v1.1.2";
+          sha256 = "sha256-Qv8zAiMtrr67CbLRrFjGaPzFZcOiMVEFLg1Z+N6VMhg=";
+        };
+      }
+    ];
+
     # Performance optimizations
     autosuggestion.strategy = [ "history" "completion" ];
     historySubstringSearch.enable = true;
@@ -61,6 +74,21 @@
 
         # FZF configuration
         export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
+        export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --info=inline"
+
+        # fzf-tab configuration for interactive completion
+        # Disable sort when completing `git checkout`
+        zstyle ':completion:*:git-checkout:*' sort false
+        # Set descriptions format to enable group support
+        zstyle ':completion:*:descriptions' format '[%d]'
+        # Set list-colors to enable filename colorizing
+        zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
+        # Preview directory's content with eza when completing cd
+        zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+        # Switch group using `,` and `.`
+        zstyle ':fzf-tab:*' switch-group ',' '.'
+        # Use tmux popup for fzf-tab (if in tmux)
+        zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 
         # Initialize carapace completion for zsh
         if command -v carapace >/dev/null 2>&1; then

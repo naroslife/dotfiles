@@ -48,14 +48,17 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 # Ensure DISPLAY is set
 export DISPLAY="${DISPLAY:-:0}"
 
-# Disable GPU acceleration if causing issues (can be removed if GPU works fine)
-# export LIBGL_ALWAYS_SOFTWARE=1
-
-# Fix for "dri3 extension not supported" warning
+# GPU rendering configuration for WSL2
+# Try hardware acceleration first with D3D12 (WSLg)
 export MESA_LOADER_DRIVER_OVERRIDE=d3d12
 
 # Electron flags to improve WSL2 compatibility
-export ELECTRON_EXTRA_LAUNCH_ARGS="--disable-gpu-sandbox --disable-software-rasterizer --enable-features=UseSkiaRenderer"
+# Note: If window doesn't appear, try commenting out --disable-software-rasterizer
+# or set LIBGL_ALWAYS_SOFTWARE=1 for full software rendering
+export ELECTRON_EXTRA_LAUNCH_ARGS="--disable-gpu-sandbox --no-sandbox --disable-dev-shm-usage"
+
+# Uncomment if window doesn't appear (forces software rendering):
+# export LIBGL_ALWAYS_SOFTWARE=1
 
 # Disable Wayland (use X11 instead for better compatibility)
 export GDK_BACKEND=x11

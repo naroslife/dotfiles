@@ -21,23 +21,23 @@ export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS}"
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
 # Fix LD_LIBRARY_PATH conflicts from CUDA installation
-# Remove /usr/lib/wsl/lib which causes libva and DRI3 errors
+# AppImages bundle their own libraries and LD_LIBRARY_PATH causes conflicts
 if [[ -n "${LD_LIBRARY_PATH:-}" ]]; then
-    export LD_LIBRARY_PATH=$(echo "$LD_LIBRARY_PATH" | sed 's|/usr/lib/wsl/lib:||g; s|:/usr/lib/wsl/lib||g; s|/usr/lib/wsl/lib||g')
-    echo "  Cleaned LD_LIBRARY_PATH (removed /usr/lib/wsl/lib)"
+    echo "  Unsetting LD_LIBRARY_PATH to avoid library conflicts"
+    unset LD_LIBRARY_PATH
 fi
 
 # Force software rendering (most reliable for Electron apps on WSLg)
 export LIBGL_ALWAYS_SOFTWARE=1
 
 # Disable GPU entirely for maximum compatibility
-export ELECTRON_EXTRA_LAUNCH_ARGS="--disable-gpu --no-sandbox --disable-dev-shm-usage --disable-software-rasterizer"
+export ELECTRON_EXTRA_LAUNCH_ARGS="--disable-gpu --no-sandbox --disable-dev-shm-usage --disable-software-rasterizer --disable-features=VaapiVideoDecoder"
 
 # Use X11, not Wayland
 export GDK_BACKEND=x11
 
 # Disable hardware video decoding
-export LIBVA_DRIVER_NAME=
+export LIBVA_DRIVER_NAME=none
 
 # Change to config directory
 cd "$HOME/.config/Next-Client" || mkdir -p "$HOME/.config/Next-Client" && cd "$HOME/.config/Next-Client"

@@ -49,11 +49,15 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export DISPLAY="${DISPLAY:-:0}"
 
 # Fix LD_LIBRARY_PATH conflicts from CUDA installation
-# Remove /usr/lib/wsl/lib which can cause libva and DRI3 errors
+# AppImages bundle their own libraries and LD_LIBRARY_PATH can cause conflicts
+# Completely unset it to let the AppImage use its bundled libraries
 if [[ -n "${LD_LIBRARY_PATH:-}" ]]; then
-    # Remove /usr/lib/wsl/lib from LD_LIBRARY_PATH for AppImages
-    export LD_LIBRARY_PATH=$(echo "$LD_LIBRARY_PATH" | sed 's|/usr/lib/wsl/lib:||g; s|:/usr/lib/wsl/lib||g; s|/usr/lib/wsl/lib||g')
+    echo "  Unsetting LD_LIBRARY_PATH to avoid library conflicts"
+    unset LD_LIBRARY_PATH
 fi
+
+# Disable VA-API to prevent libva errors
+export LIBVA_DRIVER_NAME=none
 
 # GPU rendering configuration for WSL2
 # Try hardware acceleration first with D3D12 (WSLg)
@@ -62,7 +66,7 @@ export MESA_LOADER_DRIVER_OVERRIDE=d3d12
 # Electron flags to improve WSL2 compatibility
 # Note: If window doesn't appear, try commenting out --disable-software-rasterizer
 # or set LIBGL_ALWAYS_SOFTWARE=1 for full software rendering
-export ELECTRON_EXTRA_LAUNCH_ARGS="--disable-gpu-sandbox --no-sandbox --disable-dev-shm-usage"
+export ELECTRON_EXTRA_LAUNCH_ARGS="--disable-gpu-sandbox --no-sandbox --disable-dev-shm-usage --disable-features=VaapiVideoDecoder"
 
 # Uncomment if window doesn't appear (forces software rendering):
 # export LIBGL_ALWAYS_SOFTWARE=1

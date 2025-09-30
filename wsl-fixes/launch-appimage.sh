@@ -48,21 +48,11 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 # Ensure DISPLAY is set
 export DISPLAY="${DISPLAY:-:0}"
 
-# Fix environment variable conflicts from CUDA/Nix that cause slow Electron startup
-# These variables can cause 60+ second delays in Electron initialization
-unset LD_LIBRARY_PATH CUDA_HOME CUDA_PATH
-unset LOCALE_ARCHIVE_2_27 NIX_PROFILES __ETC_PROFILE_NIX_SOURCED
-
-# Reset JAVA_HOME to system default if using Nix Java
-if [[ "$JAVA_HOME" == *"/nix/store/"* ]]; then
-    if [[ -d "/usr/lib/jvm/default-java" ]]; then
-        export JAVA_HOME="/usr/lib/jvm/default-java"
-    else
-        unset JAVA_HOME
-    fi
-fi
-
-echo "  Cleaned environment variables (removed CUDA/Nix conflicts)"
+# Environment cleanup for Electron performance
+# Investigation showed that environment variable COUNT (not specific variables)
+# causes slow startup. Threshold is ~15-18 variables. With 155 vars from Nix/CUDA
+# setup, Electron takes 60+ seconds. We use env -i below to start clean.
+# See ELECTRON_ENV_INVESTIGATION.md for full analysis.
 
 # Disable VA-API to prevent libva errors
 export LIBVA_DRIVER_NAME=none
@@ -102,8 +92,9 @@ if [[ -d "$CONFIG_DIR" ]]; then
     echo
 fi
 
-# Launch with clean environment to avoid slow startup from Nix/CUDA variables
-# Only preserve essential variables for GUI apps
+# Launch with clean environment (env -i) to avoid slow startup
+# Critical: Keep total variables under 15-18 for fast startup (see investigation doc)
+# We pass only 10-12 essential variables here for ~2-3 second startup vs 60+ seconds
 exec env -i \
     HOME="$HOME" \
     USER="$USER" \

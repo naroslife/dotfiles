@@ -20,20 +20,8 @@ export DISPLAY=:0
 export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS}"
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
-# Fix environment variable conflicts from CUDA/Nix that cause slow Electron startup
-unset LD_LIBRARY_PATH CUDA_HOME CUDA_PATH
-unset LOCALE_ARCHIVE_2_27 NIX_PROFILES __ETC_PROFILE_NIX_SOURCED
-
-# Reset JAVA_HOME to system default if using Nix Java
-if [[ "$JAVA_HOME" == *"/nix/store/"* ]]; then
-    if [[ -d "/usr/lib/jvm/default-java" ]]; then
-        export JAVA_HOME="/usr/lib/jvm/default-java"
-    else
-        unset JAVA_HOME
-    fi
-fi
-
-echo "  Cleaned environment (removed CUDA/Nix conflicts)"
+# Environment will be cleaned by env -i below
+# See ELECTRON_ENV_INVESTIGATION.md for details on the 15-18 variable threshold
 
 # Force software rendering (most reliable for Electron apps on WSLg)
 export LIBGL_ALWAYS_SOFTWARE=1
@@ -57,7 +45,8 @@ echo "  GPU: DISABLED"
 echo "  Working directory: $(pwd)"
 echo
 
-# Launch with clean environment to avoid slow startup from Nix/CUDA variables
+# Launch with clean environment (env -i) for fast startup
+# Passing only 10 essential variables keeps us well under the 15-18 threshold
 exec env -i \
     HOME="$HOME" \
     USER="$USER" \

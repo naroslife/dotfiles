@@ -20,6 +20,13 @@ export DISPLAY=:0
 export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS}"
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
+# Fix LD_LIBRARY_PATH conflicts from CUDA installation
+# Remove /usr/lib/wsl/lib which causes libva and DRI3 errors
+if [[ -n "${LD_LIBRARY_PATH:-}" ]]; then
+    export LD_LIBRARY_PATH=$(echo "$LD_LIBRARY_PATH" | sed 's|/usr/lib/wsl/lib:||g; s|:/usr/lib/wsl/lib||g; s|/usr/lib/wsl/lib||g')
+    echo "  Cleaned LD_LIBRARY_PATH (removed /usr/lib/wsl/lib)"
+fi
+
 # Force software rendering (most reliable for Electron apps on WSLg)
 export LIBGL_ALWAYS_SOFTWARE=1
 

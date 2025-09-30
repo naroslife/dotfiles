@@ -48,6 +48,13 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 # Ensure DISPLAY is set
 export DISPLAY="${DISPLAY:-:0}"
 
+# Fix LD_LIBRARY_PATH conflicts from CUDA installation
+# Remove /usr/lib/wsl/lib which can cause libva and DRI3 errors
+if [[ -n "${LD_LIBRARY_PATH:-}" ]]; then
+    # Remove /usr/lib/wsl/lib from LD_LIBRARY_PATH for AppImages
+    export LD_LIBRARY_PATH=$(echo "$LD_LIBRARY_PATH" | sed 's|/usr/lib/wsl/lib:||g; s|:/usr/lib/wsl/lib||g; s|/usr/lib/wsl/lib||g')
+fi
+
 # GPU rendering configuration for WSL2
 # Try hardware acceleration first with D3D12 (WSLg)
 export MESA_LOADER_DRIVER_OVERRIDE=d3d12

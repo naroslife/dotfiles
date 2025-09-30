@@ -72,4 +72,11 @@ if is_wsl; then
 	if [[ -f "$HOME/dotfiles/wsl-fixes/fix-dbus-wsl.sh" ]]; then
 		source "$HOME/dotfiles/wsl-fixes/fix-dbus-wsl.sh" 2>/dev/null
 	fi
+
+	# Fix WSLg systemd conflicts (run once per session)
+	if [[ ! -f ~/.cache/.wslg-systemd-fixed ]] && [[ -f "$HOME/dotfiles/wsl-fixes/fix-wslg-systemd.sh" ]]; then
+		mkdir -p ~/.cache
+		"$HOME/dotfiles/wsl-fixes/fix-wslg-systemd.sh" 2>/dev/null
+		touch ~/.cache/.wslg-systemd-fixed
+	fi
 fi

@@ -13,11 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Flake checks for automated validation
 - CHANGELOG.md to track project changes
 - `docs/PERFORMANCE.md` documenting all performance optimizations
-- Lazy-loading for Carapace completions (bash and zsh)
+- Lazy-loading for Carapace completions (bash only, zsh uses direct loading)
 - ZSH history substring search and optimized autosuggestions
 
 ### Performance
-- Lazy-load Carapace completions (saves ~100-200ms on shell startup)
+- Lazy-load Carapace completions in bash (saves ~100-200ms on shell startup)
 - Reduced Starship command timeout from 2000ms to 500ms
 - Disabled Atuin auto-sync for faster startup (manual sync available)
 - Reduced Atuin sync frequency from 5m to 1h

@@ -62,16 +62,9 @@
         # FZF configuration
         export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
 
-        # Lazy-load carapace completion for zsh (only when needed)
+        # Initialize carapace completion for zsh
         if command -v carapace >/dev/null 2>&1; then
-          _carapace_lazy() {
-            source <(carapace _carapace zsh)
-            unfunction _carapace_lazy
-            # Trigger the completion
-            zle expand-or-complete
-          }
-          zle -N _carapace_lazy
-          bindkey '^I' _carapace_lazy
+          source <(carapace _carapace zsh)
         fi
 
         # WSL-specific initialization

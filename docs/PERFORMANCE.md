@@ -8,8 +8,10 @@ This document describes the performance optimizations applied to the dotfiles co
 
 #### Carapace Completions
 - **Bash**: Completions are loaded only on first tab press using `complete -F -D`
-- **ZSH**: Completions are loaded on first tab press using custom widget
-- **Impact**: Reduces shell startup time by ~100-200ms
+- **ZSH**: Direct loading (lazy loading caused issues with completion system)
+- **Impact**:
+  - Bash: Reduces shell startup time by ~100-200ms
+  - ZSH: No lazy loading due to complexity of ZSH completion system
 
 #### Custom Functions
 - Functions are only sourced if the directory exists and contains files

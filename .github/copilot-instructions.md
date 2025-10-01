@@ -37,7 +37,7 @@ nix run home-manager/master -- switch --flake .#username --impure
 ### User Configuration Pattern
 The flake supports multiple users defined in `flake.nix`:
 ```nix
-users = [ "naroslife" "uif58593" ]; # Add usernames here
+users = [ "naroslife" "enterpriseuser" ]; # Add usernames here
 ```
 Each user gets automatically configured git credentials and home directory paths.
 

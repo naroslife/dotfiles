@@ -96,7 +96,7 @@ if grep -q "\"$CURRENT_USER\"" flake.nix 2>/dev/null; then
     USERNAME=$CURRENT_USER
 else
     print_color "$YELLOW" "No configuration found for $CURRENT_USER"
-    print_color "$YELLOW" "Available configurations: naroslife, uif58593"
+    print_color "$YELLOW" "Available configurations: naroslife, enterpriseuser"
     read -r -p "Enter username to use: " USERNAME
 
     if ! grep -q "\"$USERNAME\"" flake.nix 2>/dev/null; then

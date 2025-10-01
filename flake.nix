@@ -39,9 +39,9 @@
           email = "naroslife@gmail.com";
           fullName = "Naros Life";
         };
-        uif58593 = {
-          email = "uif58593@gmail.com";
-          fullName = "User UIF58593";
+        enterpriseuser = {
+          email = "enterpriseuser@gmail.com";
+          fullName = "User enterpriseuser";
         };
       };
 
@@ -93,9 +93,9 @@
             USERNAME="''${1:-$(whoami)}"
 
             # Check if configuration exists for this user
-            if [[ "$USERNAME" != "naroslife" && "$USERNAME" != "uif58593" ]]; then
+            if [[ "$USERNAME" != "naroslife" && "$USERNAME" != "enterpriseuser" ]]; then
               echo "Error: No configuration found for user '$USERNAME'"
-              echo "Available users: naroslife, uif58593"
+              echo "Available users: naroslife, enterpriseuser"
               echo "Usage: nix run . [username]"
               exit 1
             fi

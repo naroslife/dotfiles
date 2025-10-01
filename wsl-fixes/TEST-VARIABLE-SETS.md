@@ -7,27 +7,27 @@ This document contains the exact variable sets used in testing to help identify 
 These variables result in **2-3 second startup**:
 
 ```bash
-HOME=/home/uif58593
-USER=uif58593
+HOME=/home/enterpriseuser
+USER=enterpriseuser
 DISPLAY=:0
 XDG_RUNTIME_DIR=/run/user/1000
 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
 PATH=/usr/local/bin:/usr/bin:/bin
 LIBVA_DRIVER_NAME=none
-SHELL=/home/uif58593/.nix-profile/bin/zsh
+SHELL=/home/enterpriseuser/.nix-profile/bin/zsh
 ```
 
 **Test command:**
 ```bash
 cd ~/.config/Next-Client && env -i \
-    HOME=/home/uif58593 \
-    USER=uif58593 \
+    HOME=/home/enterpriseuser \
+    USER=enterpriseuser \
     DISPLAY=:0 \
     XDG_RUNTIME_DIR=/run/user/1000 \
     DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
     PATH=/usr/local/bin:/usr/bin:/bin \
     LIBVA_DRIVER_NAME=none \
-    SHELL=/home/uif58593/.nix-profile/bin/zsh \
+    SHELL=/home/enterpriseuser/.nix-profile/bin/zsh \
     ~/dev/Next-Client-1.10.0/squashfs-root/next-client
 ```
 
@@ -42,8 +42,8 @@ BAT_STYLE=numbers,changes,header
 BAT_THEME=Monokai Extended
 BROWSER=wslview
 BUILDKIT_PROGRESS=plain
-BUNDLE_USER_HOME=/home/uif58593/.bundle
-CARGO_HOME=/home/uif58593/.cargo
+BUNDLE_USER_HOME=/home/enterpriseuser/.bundle
+CARGO_HOME=/home/enterpriseuser/.cargo
 CLAUDE=true
 CLAUDECODE=1
 CLAUDE_CODE_ENTRYPOINT=cli
@@ -55,7 +55,7 @@ CUDA_HOME=/usr/local/cuda
 CUDA_PATH=/usr/local/cuda
 DELTA_FEATURES=+side-by-side
 DOCKER_BUILDKIT=1
-DOTFILES=/home/uif58593/dotfiles
+DOTFILES=/home/enterpriseuser/dotfiles
 ```
 
 **Notable variables:**
@@ -79,13 +79,13 @@ FZF_CTRL_R_OPTS=--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '
 FZF_CTRL_T_OPTS=--preview '(bat --color=always {} || tree -C {}) 2> /dev/null | head -200'
 FZF_DEFAULT_COMMAND=fd --type f --hidden --follow
 FZF_DEFAULT_OPTS=--height 40% --layout=reverse --border --info=inline
-GEM_HOME=/home/uif58593/.gem
-GIT_ASKPASS=/home/uif58593/.vscode-server/bin/e3a5acfb517a443235981655413d566533107e92/extensions/git/dist/askpass.sh
+GEM_HOME=/home/enterpriseuser/.gem
+GIT_ASKPASS=/home/enterpriseuser/.vscode-server/bin/e3a5acfb517a443235981655413d566533107e92/extensions/git/dist/askpass.sh
 GIT_EDITOR=true
-GNUPGHOME=/home/uif58593/.gnupg
+GNUPGHOME=/home/enterpriseuser/.gnupg
 GO111MODULE=on
-GOBIN=/home/uif58593/go/bin
-GOPATH=/home/uif58593/go
+GOBIN=/home/enterpriseuser/go/bin
+GOPATH=/home/enterpriseuser/go
 GPG_TTY=not a tty
 HISTCONTROL=ignoreboth:erasedups
 HISTFILESIZE=100000

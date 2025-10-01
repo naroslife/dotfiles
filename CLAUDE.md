@@ -14,9 +14,9 @@ This is a personal dotfiles repository managed with Nix Home Manager, providing 
 ./apply.sh
 
 # Apply configuration with specific username (flake mode)
-nix run home-manager/master -- switch --impure --flake ".#uif58593"
+nix run home-manager/master -- switch --impure --flake ".#enterpriseuser"
 
-# Available usernames configured in flake.nix: naroslife, uif58593
+# Available usernames configured in flake.nix: naroslife, enterpriseuser
 ```
 
 ### Update Configuration

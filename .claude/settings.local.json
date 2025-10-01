@@ -1,8 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Read(//home/uif58593/.config/Next-Client/**)",
-      "Read(//home/uif58593/dev/Next-Client-1.10.0/squashfs-root/resources/**)"
+      "Read(//home/enterpriseuser/.config/Next-Client/**)",
+      "Read(//home/enterpriseuser/dev/Next-Client-1.10.0/squashfs-root/resources/**)"
     ],
     "deny": [],
     "ask": []

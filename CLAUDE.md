@@ -78,7 +78,7 @@ When running on WSL, additional features are activated:
 - Clipboard integration (pbcopy/pbpaste aliases)
 - Windows path integration
 - WSL utilities (wslview, wslpath, wslvar)
-- Daily APT network configuration checks (Continental-specific)
+- Daily APT network configuration checks (Enterprise-specific)
 - Performance optimizations and proper umask settings
 
 ## Important Notes

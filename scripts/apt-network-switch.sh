@@ -7,14 +7,14 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-CORP_TEST_IPS=("10.68.10.71" "10.68.8.19" "10.68.10.193")
+CORP_TEST_IPS=("192.0.2.1" "192.0.2.2" "192.0.2.3")  # TEST-NET-1 (RFC 5737) - never routable
 SOURCES_DIR="/etc/apt/sources.list.d"
 DISABLED_DIR="$SOURCES_DIR/disabled"
 
 # Function to test corporate network connectivity - FAST VERSION
 test_corporate_network() {
     # Quick test: try to connect to first IP on port 443 (very fast)
-    timeout 0.5 bash -c "echo >/dev/tcp/10.68.10.71/443" &>/dev/null && return 0
+    timeout 0.5 bash -c "echo >/dev/tcp/${CORP_TEST_IPS[0]}/443" &>/dev/null && return 0
 
     # If that fails, try a quick ping to any corporate IP
     for ip in "${CORP_TEST_IPS[@]}"; do
@@ -63,11 +63,11 @@ else
 fi
 
 if [[ $network_detected -eq 0 ]]; then
-    log "${GREEN}✓ Corporate network detected (Continental/Automotive)${NC}"
+    log "${GREEN}✓ Enterprise network detected${NC}"
 
     # Enable corporate sources
     if [ -d "$DISABLED_DIR" ] && [ "$(ls -A $DISABLED_DIR 2>/dev/null)" ]; then
-        log "Enabling corporate Artifactory repositories..."
+        log "Enabling corporate repositories..."
         sudo mv $DISABLED_DIR/*.list $SOURCES_DIR/ 2>/dev/null
     fi
 

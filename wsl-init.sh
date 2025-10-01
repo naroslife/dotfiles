@@ -37,7 +37,7 @@ if is_wsl; then
 	if [ "$SHOW_MESSAGES" = true ]; then
 		echo "🔧 WSL environment detected - applying optimizations..."
 
-		# Auto-run APT network switch once per day (Continental/WSL specific)
+		# Auto-run APT network switch once per day (Enterprise and WSL specific)
 		if command -v apt-network-switch &>/dev/null; then
 			echo "🔄 Running daily APT network configuration check..."
 

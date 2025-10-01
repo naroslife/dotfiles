@@ -92,7 +92,7 @@ let
 
     claude = "~/.claude/local/claude";
 
-    # APT network management (Continental/WSL specific)
+    # APT network management (Enterprise and WSL specific)
     apt-switch = "apt-network-switch";
     apt-update = "apt-network-switch"; # Override default with network-aware version
     apt-check = "apt-status";

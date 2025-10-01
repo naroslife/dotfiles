@@ -5,7 +5,7 @@
     wslu # Windows Subsystem for Linux utilities (wslview, wslpath, etc.)
     # vcxsrv       # X server for Windows (enables GUI apps in WSL)
 
-    # APT network switching scripts for WSL with Continental repos
+    # APT network switching scripts for WSL with Enterprise repos
     (writeShellScriptBin "apt-network-switch" (builtins.readFile ../scripts/apt-network-switch.sh))
   ];
 
@@ -23,7 +23,8 @@
 
     # Add custom library paths (keeps existing LD_LIBRARY_PATH if set)
     # Includes WSL NVIDIA libraries and CUDA paths
-    LD_LIBRARY_PATH = "/usr/lib/wsl/lib:/usr/local/cuda/lib64:${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freediameter/lib:${config.home.homeDirectory}/inshipia/telekom/aaa/vowifi/migration/local/freeradius/lib:$LD_LIBRARY_PATH";
+    # Add project-specific library paths as needed
+    LD_LIBRARY_PATH = "/usr/lib/wsl/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH";
   };
 
   # WSL-specific aliases

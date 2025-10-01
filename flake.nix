@@ -1,5 +1,5 @@
 {
-  description = "Modular Home Manager configuration with Nix flakes";
+  description = "Modular Home Manager configuration with Nix flakes - private version";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
